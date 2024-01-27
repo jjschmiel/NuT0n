@@ -1,10 +1,10 @@
 import pygame
 import sys
 import time
-from GameObjects.FloorOrWall import FloorOrWall as FloorOrWall
-from GameObjects.Player import Player as Player
-from GameObjects.Platform import Platform as Platform
-from GameObjects.Panel import Panel as Panel
+from GameObjects.FloorOrWall import FloorOrWall
+from GameObjects.Player import Player
+from GameObjects.Platform import Platform
+from GameObjects.Panel import Panel
 
 # Initialize Pygame
 pygame.init()
