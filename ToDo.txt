@@ -1,0 +1,5 @@
+-add sinister void
+-more platforms
+-end game screen with score/how long you lasted and restart game
+-port to web
+-refactor platform so any platform to run into you stand on it, or cant jump through

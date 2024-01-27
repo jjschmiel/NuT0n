@@ -179,11 +179,8 @@ def main():
                     else:
                         jumping = False
 
-        
-                
             # Apply gravity
             player.y += GRAVITY
-
 
             # Check for collision with the floor
             if player.colliderect(floor):
