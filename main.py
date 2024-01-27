@@ -17,9 +17,6 @@ JUMP_VELOCITY = 20
 jump_start_time = 0
 playerAnimationCounter = 0 
 
-# Set up the display window
-WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-
 # set up the display window full screen
 WIN = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
