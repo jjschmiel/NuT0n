@@ -42,24 +42,20 @@ def draw_window():
     pygame.display.update()  # Update the display
 
 # Define the walls
-WALL_WIDTH, WALL_HEIGHT = 50, 250
-leftWall = pygame.Rect(WIDTH // 2, HEIGHT // 2, WALL_WIDTH, WALL_HEIGHT)
-leftWall.x -= 250  # Move the wall to the left
-rightWall = pygame.Rect(WIDTH // 2, HEIGHT // 2, WALL_WIDTH, WALL_HEIGHT)
-rightWall.x += 350  # Move the wall to the right
+WALL_WIDTH, WALL_HEIGHT = 50, 1080
 
 # Define the floor
 FLOOR_WIDTH, FLOOR_HEIGHT = 550, 50
-floor = pygame.Rect(WIDTH // 2, HEIGHT // 2, FLOOR_WIDTH, FLOOR_HEIGHT)
-floor.y += 250  # Move the floor down
-floor.x -= 250  # Move the floor to the left
 
 # Create the walls and floor
-leftWall = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 300,  WALL_WIDTH, WALL_HEIGHT, (0, 255, 0))
-rightWall = FloorOrWall(WIDTH // 2 + 250, HEIGHT - 300, WALL_WIDTH, WALL_HEIGHT, (0, 255, 0))
-floor = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 50, FLOOR_WIDTH, FLOOR_HEIGHT, (0, 0, 255))
-platform = Platform(WIDTH // 2 - 100, HEIGHT // 2 + 100, 200, 50, 'Assets/Platform/platform1.png')
-environment = pygame.sprite.Group(leftWall, rightWall, floor, platform)
+floorOrWallImages = [pygame.image.load('Assets/Platform/platform1.png'), pygame.image.load('Assets/Platform/platform2.png'), pygame.image.load('Assets/Platform/platform3.png')]
+leftWall = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 1080,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
+rightWall = FloorOrWall(WIDTH // 2 + 250, HEIGHT - 1080, WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
+floor = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 50, FLOOR_WIDTH, FLOOR_HEIGHT, 'Assets/Platform/platform1.png')
+platform = Platform(WIDTH // 2 - 10, HEIGHT - 200, 200, 50, 'Assets/Platform/platform1.png')
+platform2 = Platform(WIDTH // 2 - 200, HEIGHT - 300, 200, 50, 'Assets/Platform/platform2.png')
+platform3 = Platform(WIDTH // 2 - 20, HEIGHT - 400, 200, 50, 'Assets/Platform/platform3.png')
+environment = pygame.sprite.Group(leftWall, rightWall, floor, platform,platform2, platform3)
 
 
 
@@ -86,6 +82,8 @@ def main():
         clock.tick(60)  # Cap the frame rate at 60 FPS
         WIN.fill((0, 0, 0)) # Fill the screen with black
         platform.draw(WIN)
+        platform2.draw(WIN)
+        platform3.draw(WIN)
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
@@ -130,6 +128,12 @@ def main():
                 if player.y == platform.rect.y - 64:
                     jumping = True
                     jumpClock = time.time()  # Record the start time of the jump
+                if player.y == platform2.rect.y - 64:
+                    jumping = True
+                    jumpClock = time.time()  # Record the start time of the jump
+                if player.y == platform3.rect.y - 64:
+                    jumping = True
+                    jumpClock = time.time()  # Record the start time of the jump
                 if player.y == rightWall.rect.y - 64:
                     jumping = True
                     jumpClock = time.time()  # Record the start time of the jump
@@ -154,7 +158,6 @@ def main():
         if player.colliderect(floor):
             player.y = floor.rect.y - 64  # Stop the vertical movement
 
-          # Check for collision with the floor
         if player.colliderect(platform):
             if player.y < platform.rect.y:  # Player is on the bottom side of the platform
                 player.y = platform.rect.y - PLAYER_HEIGHT
@@ -164,6 +167,26 @@ def main():
                 player.x = platform.rect.x - PLAYER_WIDTH
             elif player.x > platform.rect.x:  # Player is on the right side of the platform
                 player.x = platform.rect.x + PLAYER_WIDTH
+
+        if player.colliderect(platform2):
+            if player.y < platform2.rect.y:  # Player is on the bottom side of the platform
+                player.y = platform2.rect.y - PLAYER_HEIGHT
+            elif player.y >= platform2.rect.y:  # Player is on the bottom side of the platform
+                player.y = platform2.rect.y + PLAYER_HEIGHT
+            elif player.x < platform2.rect.x:  # Player is on the left side of the platform
+                player.x = platform2.rect.x - PLAYER_WIDTH
+            elif player.x > platform2.rect.x:  # Player is on the right side of the platform
+                player.x = platform2.rect.x + PLAYER_WIDTH
+
+        if player.colliderect(platform3):
+            if player.y < platform3.rect.y:  # Player is on the bottom side of the platform
+                player.y = platform3.rect.y - PLAYER_HEIGHT
+            elif player.y >= platform3.rect.y:  # Player is on the bottom side of the platform
+                player.y = platform3.rect.y + PLAYER_HEIGHT
+            elif player.x < platform3.rect.x:  # Player is on the left side of the platform
+                player.x = platform3.rect.x - PLAYER_WIDTH
+            elif player.x > platform3.rect.x:  # Player is on the right side of the platform
+                player.x = platform3.rect.x + PLAYER_WIDTH
             
 
         if player.colliderect(rightWall):
