@@ -5,7 +5,8 @@ from GameObjects.FloorOrWall import FloorOrWall
 from GameObjects.Player import Player, create_player, player_images
 from GameObjects.Platform import Platform
 from GameObjects.Panel import Panel
-from config import WIDTH, HEIGHT, VELOCITY, GRAVITY, JUMP_VELOCITY, playerAnimationCounter
+from config import WIDTH, HEIGHT, VELOCITY, GRAVITY, JUMP_VELOCITY, playerAnimationCounter, PLAYER_HEIGHT, PLAYER_WIDTH
+from scenes.titleScreen import run_title_screen
 
 # Initialize Pygame
 pygame.init()
@@ -15,31 +16,6 @@ pygame.init()
 WIN = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 player = create_player()
-
-def show_title_screen():
-    title_font = pygame.font.Font(None, 70)  # Choose the font for the title
-    instruction_font = pygame.font.Font(None, 35)  # Choose the font for the instructions
-
-    title = title_font.render("My Game", True, (255, 255, 255))  # Create the title
-    instructions = instruction_font.render("Press any key to start", True, (255, 255, 255))  # Create the instructions
-
-    # Load the image
-    image = pygame.image.load('Assets/Logo/logo.png')
-    image = pygame.transform.scale(image, (WIDTH, HEIGHT))  # Resize the image to fit the screen
-
-    WIN.blit(image, (0, 0))
-    WIN.blit(instructions, ((WIDTH - instructions.get_width()) // 2, HEIGHT - 70))  # Draw the instructions
-
-    pygame.display.flip()  # Update the display
-
-    waiting = True
-    while waiting:  # Wait for the user to press a key
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == pygame.KEYUP:  # This will trigger when a key is released
-                waiting = False
 
 # Set up the environment
 # bg_x = 0
@@ -86,7 +62,7 @@ def main():
     pygame.mixer.music.load('music.mp3')  # Load the music file
     # pygame.mixer.music.play(-1)  # Play the music indefinitely
 
-    show_title_screen()  # Show the title screen
+    run_title_screen(WIN)  # Show the title screen
 
     running = True
     while running:

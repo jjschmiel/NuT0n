@@ -1,5 +1,5 @@
 import pygame
-from config import HEIGHT, WIDTH
+from config import HEIGHT, WIDTH, PLAYER_HEIGHT, PLAYER_WIDTH
 
 
 class Player(pygame.Rect):
@@ -9,11 +9,6 @@ class Player(pygame.Rect):
 
 
 def create_player():
-    PLAYER_WIDTH = 46
-    PLAYER_HEIGHT = 64
-    PLAYER_STARTING_POSITION_X_AXIS = WIDTH // 2
-    PLAYER_STARTING_POSITION_Y_AXIS = 440
-
     return Player(WIDTH // 2, HEIGHT - 50, PLAYER_WIDTH, PLAYER_HEIGHT)
 
 
