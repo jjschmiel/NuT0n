@@ -13,7 +13,7 @@ class Platform(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft=(x, y))
 
     def draw(self, window):
-        window.blit(self.image, (self.x, self.y))
+        window.blit(self.image, (self.rect.x, self.rect.y))
 
     def update(self):
         self.rect.y += SCROLL_SPEED
