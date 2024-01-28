@@ -2,32 +2,19 @@ import pygame
 import sys
 import time
 from GameObjects.FloorOrWall import FloorOrWall
-from GameObjects.Player import Player
+from GameObjects.Player import Player, create_player, player_images
 from GameObjects.Platform import Platform
 from GameObjects.Panel import Panel
+from config import WIDTH, HEIGHT, VELOCITY, GRAVITY, JUMP_VELOCITY, playerAnimationCounter
 
 # Initialize Pygame
 pygame.init()
 
-# Set up some constants
-WIDTH, HEIGHT = 1920, 1080
-VELOCITY = 6
-GRAVITY = 8
-JUMP_VELOCITY = 20
-jump_start_time = 0
-playerAnimationCounter = 0 
 
 # set up the display window full screen
 WIN = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
-# Set up the player
-PLAYER_WIDTH = 46
-PLAYER_HEIGHT = 64
-PLAYER_STARTING_POSITION_X_AXIS = WIDTH // 2
-PLAYER_STARTING_POSITION_Y_AXIS = 440
-player = Player(WIDTH // 2, HEIGHT - 50, PLAYER_WIDTH, PLAYER_HEIGHT)
-player_images = [pygame.image.load('Assets/PlayerAnimation/player1.png'), pygame.image.load('Assets/PlayerAnimation/player2.png'), pygame.image.load('Assets/PlayerAnimation/player3.png')]
-print("player_images: " + str(player_images))
+player = create_player()
 
 def show_title_screen():
     title_font = pygame.font.Font(None, 70)  # Choose the font for the title
