@@ -11,9 +11,9 @@ def run_title_screen(WIN):
 
     # Load the image
     image = pygame.image.load('./Assets/Logo/logo.png')
-    image = pygame.transform.scale(image, (WIDTH, HEIGHT))  # Resize the image to fit the screen
+    image = pygame.transform.scale(image, (WIDTH, 300))  # Resize the image to fit the screen
 
-    WIN.blit(image, (0, 0))
+    WIN.blit(image, (0, HEIGHT // 2 - 150))
     WIN.blit(instructions, ((WIDTH - instructions.get_width()) // 2, HEIGHT - 70))  # Draw the instructions
 
     pygame.display.flip()  # Update the display
