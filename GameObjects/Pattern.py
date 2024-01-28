@@ -1,5 +1,5 @@
 from GameObjects.Platform import create_small_platform
-from config import LEFT_EDGE_OF_PLAY_AREA, RIGHT_EDGE_OF_PLAY_AREA, SMALL_PLATFORM_WIDTH, WALL_WIDTH
+from config import LEFT_EDGE_OF_PLAY_AREA, RIGHT_EDGE_OF_PLAY_AREA, SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT, WALL_WIDTH
 
 # platform = Platform(WIDTH // 2 - 10, HEIGHT - 200, 200, 50, 'Assets/Platform/platform1.png')
 # platform2 = Platform(WIDTH // 2 - 200, HEIGHT - 300, 200, 50, 'Assets/Platform/platform2.png')
@@ -16,6 +16,15 @@ class Pattern():
     def add_platform(self, x, y):
         p = create_small_platform(x + LEFT_EDGE_OF_PLAY_AREA + WALL_WIDTH, y + self.bottom_y)
         self.platforms.append(p)
+
+    def get_pattern_height(self):
+        height = 0
+        for p in self.platforms:
+            p_top = p.y + SMALL_PLATFORM_HEIGHT
+            if p_top > height:
+                height = p.top
+        return height
+
 
 def create_pattern_1(bottom_y):
     pattern = Pattern(bottom_y)

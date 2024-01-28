@@ -14,6 +14,7 @@ def handle_collisions(player, platforms):
     if player.y > HEIGHT - FLOOR_HEIGHT - PLAYER_HEIGHT:
         player.y = HEIGHT - FLOOR_HEIGHT - PLAYER_HEIGHT
         player.canJump = True
+        
 
     for p in platforms:
         handle_platform_collision(player, p)
