@@ -6,7 +6,7 @@
 
 -------
 
-- [E] increasing speed
+- DONE [E] increasing speed
 - DONE [J] button input delay on death 
 - [J] death music
 - [J] music

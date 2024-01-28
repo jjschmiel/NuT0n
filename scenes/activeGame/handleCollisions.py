@@ -1,13 +1,13 @@
 from config import PLAYER_HEIGHT, PLAYER_WIDTH, HEIGHT, LOG_FUNCTION_CALLS, FLOOR_HEIGHT, WALL_WIDTH, LEFT_EDGE_OF_PLAY_AREA, RIGHT_EDGE_OF_PLAY_AREA
 
 
-def handle_collisions(player, platforms):
+def handle_collisions(player, platforms, seconds):
     if LOG_FUNCTION_CALLS:
         print('running handle_collisions')
     #Blocked by walls
-    if player.x < LEFT_EDGE_OF_PLAY_AREA + WALL_WIDTH:
+    if player.x < LEFT_EDGE_OF_PLAY_AREA + WALL_WIDTH and seconds < 32:
         player.x = LEFT_EDGE_OF_PLAY_AREA + WALL_WIDTH
-    elif player.x > RIGHT_EDGE_OF_PLAY_AREA - PLAYER_WIDTH:
+    elif player.x > RIGHT_EDGE_OF_PLAY_AREA - PLAYER_WIDTH and seconds < 32:
         player.x = RIGHT_EDGE_OF_PLAY_AREA - PLAYER_WIDTH
 
     #Blocked by floor
