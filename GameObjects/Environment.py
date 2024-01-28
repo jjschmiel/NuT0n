@@ -21,15 +21,18 @@ class Environment():
         ]
         self.deathVoid = DeathVoid((WIDTH // 2) - 200, HEIGHT - 50, 450, 50, 'Assets/DeathVoid/deathVoid.gif')
     
+    def setScrollSpeed(self, scroll_speed):
+        self.scroll_speed = scroll_speed -1
+
     def update(self):
         wall_delete_list = []
         panel_delete_list = []
         for w in self.walls:
-            w.rect.y += SCROLL_SPEED
+            w.rect.y += self.scroll_speed
             if w.rect.y > HEIGHT:
                 wall_delete_list.append(w)
         for p in self.panels:
-            p.y += SCROLL_SPEED
+            p.y += self.scroll_speed
             if p.y > HEIGHT:
                 panel_delete_list.append(p)
             if p.y > HEIGHT - PANEL_SCREEN_HEIGHT_DIFF and len(self.panels) < 6:
