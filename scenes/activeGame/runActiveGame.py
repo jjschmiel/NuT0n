@@ -29,15 +29,16 @@ def run_active_game(WIN, clock, highScore):
         # Calculate how many seconds
         seconds = (pygame.time.get_ticks() - start_ticks) / 1000
 
-        if math.floor(seconds) % 5 == 0 and ready_to_increase:
+        if math.floor(seconds) % 10 == 0 and ready_to_increase:
             m_scroll_speed += 1
             ready_to_increase = False
-        elif not math.floor(seconds) % 5 == 0:
+        elif not math.floor(seconds) % 10 == 0:
             ready_to_increase = True
 
         platformManager.setScrollSpeed(m_scroll_speed)
         environment.setScrollSpeed(m_scroll_speed)
-        
+        environment.setTime(seconds)
+
         # Render the timer text
         timer_text = font.render(str(int(seconds)), True, (255, 255, 255))
         highScore_text = font.render("HIGH SCORE: " + str(int(highScore)), True, (255, 255, 255))
@@ -47,7 +48,7 @@ def run_active_game(WIN, clock, highScore):
                 pygame.quit()
                 sys.exit()
 
-        update_active_game(player, platformManager, environment)
+        update_active_game(player, platformManager, environment, seconds)
         draw_active_game(WIN, player, platformManager, environment, timer_text, highScore_text,)
 
     return seconds

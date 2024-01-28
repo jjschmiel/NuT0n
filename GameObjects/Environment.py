@@ -2,6 +2,7 @@ from GameObjects.FloorOrWall import FloorOrWall
 from GameObjects.Panel import Panel
 from GameObjects.DeathVoid import DeathVoid
 from config import WIDTH, HEIGHT, WALL_WIDTH, WALL_HEIGHT, SCROLL_SPEED, PANEL_HEIGHT
+import math
 
 PANEL_SCREEN_HEIGHT_DIFF = HEIGHT - PANEL_HEIGHT
 
@@ -24,18 +25,21 @@ class Environment():
     def setScrollSpeed(self, scroll_speed):
         self.scroll_speed = scroll_speed -1
 
+    def setTime(self, time):
+        self.time = time
+
     def update(self):
         wall_delete_list = []
         panel_delete_list = []
         for w in self.walls:
             w.rect.y += self.scroll_speed
-            if w.rect.y > HEIGHT:
+            if w.rect.y > HEIGHT and self.time < 30:
                 wall_delete_list.append(w)
         for p in self.panels:
             p.y += self.scroll_speed
-            if p.y > HEIGHT:
+            if p.y > HEIGHT and self.time < 20:
                 panel_delete_list.append(p)
-            if p.y > HEIGHT - PANEL_SCREEN_HEIGHT_DIFF and len(self.panels) < 6:
+            if p.y > HEIGHT - PANEL_SCREEN_HEIGHT_DIFF and len(self.panels) < 6 and self.time < 20:
                 self.panels.append(Panel(p.x, -PANEL_HEIGHT + PANEL_SCREEN_HEIGHT_DIFF,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Panels/leftPanel.png'))
         
         for w in wall_delete_list:
@@ -45,6 +49,10 @@ class Environment():
         for p in panel_delete_list:
             self.panels.remove(p)
             del p
+        
+        if self.time > 35 and math.floor(self.time) % 2 == 0:
+            self.deathVoid.rect.y +=1
+
 
 
     def draw(self, WIN):
