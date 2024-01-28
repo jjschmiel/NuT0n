@@ -6,6 +6,7 @@ from GameObjects.Platform import Platform
 from GameObjects.Panel import Panel
 from GameObjects.Pattern import create_pattern_1
 from config import WIDTH, HEIGHT, WALL_WIDTH, WALL_HEIGHT, FLOOR_WIDTH, FLOOR_HEIGHT
+from GameObjects.Environment import Environment
 import pygame
 import sys
 
@@ -13,7 +14,6 @@ def run_active_game(WIN, clock):
     # Create the walls and floor
     leftWall = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 1080,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
     rightWall = FloorOrWall(WIDTH // 2 + 250, HEIGHT - 1080, WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
-    floor = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 50, FLOOR_WIDTH, FLOOR_HEIGHT, 'Assets/Platform/platform1.png')
     platform = Platform(WIDTH // 2 - 10, HEIGHT - 200, 200, 50, 'Assets/Platform/platform1.png')
     platform2 = Platform(WIDTH // 2 - 200, HEIGHT - 300, 200, 50, 'Assets/Platform/platform2.png')
     platform3 = Platform(WIDTH // 2 - 20, HEIGHT - 400, 200, 50, 'Assets/Platform/platform3.png')
@@ -22,7 +22,7 @@ def run_active_game(WIN, clock):
 
     pattern_1 = create_pattern_1(400)
 
-    environment = pygame.sprite.Group(leftWall, rightWall, floor, platform,platform2, platform3, leftPanel, rightPanel, *pattern_1.platforms)
+    environment = Environment()
     platforms = [platform, platform2, platform3, *pattern_1.platforms]
 
     player = create_player()
