@@ -9,7 +9,7 @@
 - DONE [E] increasing speed
 - DONE [J] button input delay on death 
 - [J] death music
-- [J] music
+- DONE [J] music
 - [E] jump sfx
 - [J] animate gravity void
 - [E] add star background (when  high enough)
