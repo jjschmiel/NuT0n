@@ -2,14 +2,13 @@ from config import GRAVITY, LOG_FUNCTION_CALLS
 from scenes.activeGame.activeGameControls import active_game_controls
 from scenes.activeGame.handleCollisions import handle_collisions
 
-def update_active_game(player, platforms, environment):
+def update_active_game(player, platformManager, environment):
     if LOG_FUNCTION_CALLS:
         print('running update_active_game')
     player.y += GRAVITY
     active_game_controls(player)
     player.update()
     environment.update()
-    handle_collisions(player, platforms)
-    for p in platforms:
-        p.update()
+    handle_collisions(player, platformManager.platforms)
+    platformManager.update()
     player.update_animation()

@@ -3,3 +3,21 @@
 -end game screen with score/how long you lasted and restart game
 -port to web
 -refactor platform so any platform to run into you stand on it, or cant jump through
+
+-------
+
+- [E] increasing speed
+- [J] button input delay on death
+- [J] death music
+- [J] music
+- [E] jump sfx
+- [J] animate gravity void
+- [E] add star background (when  high enough)
+
+- animate jump and update walk animate
+
+-porting to webassembly
+
+beats to trigger
+- speed increase
+- walls fall away, trigger background, trigger new music

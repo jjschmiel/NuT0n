@@ -3,16 +3,17 @@ from scenes.activeGame.drawActiveGame import draw_active_game
 from GameObjects.Player import create_player
 from GameObjects.Pattern import create_pattern_1, create_pattern_2
 from GameObjects.Environment import Environment
+from GameObjects.PlatformManager import PlatformManager
 from config import HEIGHT
 import pygame
 import sys
 
 def run_active_game(WIN, clock):
-    pattern_1 = create_pattern_1(400)
-    pattern_2 = create_pattern_2(HEIGHT)
+    # pattern_1 = create_pattern_1(400)
+    # pattern_2 = create_pattern_2(HEIGHT)
 
     environment = Environment()
-    platforms = [*pattern_2.platforms, *pattern_1.platforms]
+    platformManager = PlatformManager()
 
     player = create_player()
 
@@ -22,5 +23,5 @@ def run_active_game(WIN, clock):
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-        update_active_game(player, platforms, environment)
-        draw_active_game(WIN, player, platforms, environment)
+        update_active_game(player, platformManager, environment)
+        draw_active_game(WIN, player, platformManager, environment)
