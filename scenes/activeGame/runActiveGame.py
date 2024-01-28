@@ -26,12 +26,20 @@ def run_active_game(WIN, clock):
     platforms = [platform, platform2, platform3, *pattern_1.platforms]
 
     player = create_player()
- 
-    while True:
+
+    TIMER_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(TIMER_EVENT, 1000)
+
+    alive = True
+
+    while alive == True:
         clock.tick(60)  # Cap the frame rate at 60 FPS
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
+            elif event.type == TIMER_EVENT:
+                alive = False
+                print("5 seconds have passed!")
         update_active_game(player, platforms, environment)
         draw_active_game(WIN, environment, player)

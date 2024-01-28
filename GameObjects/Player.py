@@ -44,4 +44,4 @@ class Player(pygame.Rect):
         
 
 def create_player():
-    return Player(WIDTH // 2, HEIGHT - 50, PLAYER_WIDTH, PLAYER_HEIGHT)
+    return Player(WIDTH // 2, HEIGHT - 450, PLAYER_WIDTH, PLAYER_HEIGHT)
