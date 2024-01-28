@@ -1,4 +1,6 @@
 import pygame
+import random
+from config import SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image_path):
@@ -12,3 +14,15 @@ class Platform(pygame.sprite.Sprite):
 
     def draw(self, window):
         window.blit(self.image, (self.x, self.y))
+
+
+def create_small_platform(x, y):
+    return Platform(x, y, SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT, random_platform_img())
+    
+
+def random_platform_img():
+    return random.choice([
+        'Assets/Platform/platform1.png',
+        'Assets/Platform/platform2.png',
+        'Assets/Platform/platform3.png'
+    ])

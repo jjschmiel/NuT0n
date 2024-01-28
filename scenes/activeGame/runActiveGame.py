@@ -4,7 +4,8 @@ from GameObjects.Player import create_player
 from GameObjects.FloorOrWall import FloorOrWall
 from GameObjects.Platform import Platform
 from GameObjects.Panel import Panel
-from config import WIDTH, HEIGHT, WALL_WIDTH, WALL_HEIGHT, FLOOR_WIDTH, FLOOR_HEIGHT, LOG_FUNCTION_CALLS
+from GameObjects.Pattern import create_pattern_1
+from config import WIDTH, HEIGHT, WALL_WIDTH, WALL_HEIGHT, FLOOR_WIDTH, FLOOR_HEIGHT
 import pygame
 import sys
 
@@ -18,8 +19,11 @@ def run_active_game(WIN, clock):
     platform3 = Platform(WIDTH // 2 - 20, HEIGHT - 400, 200, 50, 'Assets/Platform/platform3.png')
     leftPanel = Panel(100,25,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Panels/leftPanel.png')
     rightPanel = Panel(WIDTH - 575, 25,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Panels/rightPanel.png')
-    environment = pygame.sprite.Group(leftWall, rightWall, floor, platform,platform2, platform3, leftPanel, rightPanel)
-    platforms = [platform, platform2, platform3]
+
+    pattern_1 = create_pattern_1(400)
+
+    environment = pygame.sprite.Group(leftWall, rightWall, floor, platform,platform2, platform3, leftPanel, rightPanel, *pattern_1.platforms)
+    platforms = [platform, platform2, platform3, *pattern_1.platforms]
 
     player = create_player()
  
