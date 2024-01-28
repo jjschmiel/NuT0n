@@ -1,6 +1,6 @@
 import pygame
 import time
-from config import HEIGHT, WIDTH, PLAYER_HEIGHT, PLAYER_WIDTH
+from config import HEIGHT, WIDTH, PLAYER_HEIGHT, PLAYER_WIDTH, SCROLL_SPEED
 
 
 player_images = [
@@ -38,6 +38,9 @@ class Player(pygame.Rect):
             img = pygame.transform.flip(img, True, False)
         
         WIN.blit(img, (self.x, self.y))
+    
+    def update(self):
+        self.y -= SCROLL_SPEED
         
 
 def create_player():

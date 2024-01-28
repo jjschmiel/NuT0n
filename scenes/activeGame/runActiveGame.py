@@ -33,5 +33,5 @@ def run_active_game(WIN, clock):
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-        update_active_game(player, platforms)
+        update_active_game(player, platforms, environment)
         draw_active_game(WIN, environment, player)
