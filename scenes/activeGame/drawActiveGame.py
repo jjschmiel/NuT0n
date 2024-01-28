@@ -1,7 +1,7 @@
 import pygame
 from config import LOG_FUNCTION_CALLS, WIDTH
 
-def draw_active_game(WIN, player, platformManager, environment, timer_text, highScore):
+def draw_active_game(WIN, player, platformManager, environment, timer_text, highScore, star):
     if LOG_FUNCTION_CALLS:
         print('running draw_active_game')
     WIN.fill((0, 0, 0)) # Fill the screen with black
@@ -11,4 +11,5 @@ def draw_active_game(WIN, player, platformManager, environment, timer_text, high
     player.draw(WIN)
     WIN.blit(timer_text, (WIDTH // 2, 50))
     WIN.blit(highScore, (WIDTH // 6, 50))
+    star.draw(WIN)
     pygame.display.update()  # Update the display

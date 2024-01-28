@@ -3,6 +3,8 @@ from scenes.activeGame.drawActiveGame import draw_active_game
 from GameObjects.Player import create_player
 from GameObjects.Environment import Environment
 from GameObjects.PlatformManager import PlatformManager
+from GameObjects.Star import Star
+from GameObjects.StarManager import StarManager
 import config
 import pygame
 import sys
@@ -14,6 +16,7 @@ def run_active_game(WIN, clock, highScore):
 
     environment = Environment()
     platformManager = PlatformManager()
+    starManager = StarManager()
 
     player = create_player()
 
@@ -23,6 +26,8 @@ def run_active_game(WIN, clock, highScore):
     ready_to_increase = True
 
     m_scroll_speed = config.SCROLL_SPEED
+
+    star = Star(400, 400)
     while player.alive ==  True:
         clock.tick(60)  # Cap the frame rate at 60 FPS
 
@@ -38,6 +43,7 @@ def run_active_game(WIN, clock, highScore):
         platformManager.setScrollSpeed(m_scroll_speed)
         environment.setScrollSpeed(m_scroll_speed)
         environment.setTime(seconds)
+        starManager.setTime(seconds)
 
         # Render the timer text
         timer_text = font.render(str(int(seconds)), True, (255, 255, 255))
@@ -48,7 +54,8 @@ def run_active_game(WIN, clock, highScore):
                 pygame.quit()
                 sys.exit()
 
-        update_active_game(player, platformManager, environment, seconds)
-        draw_active_game(WIN, player, platformManager, environment, timer_text, highScore_text,)
+        update_active_game(player, platformManager, environment, seconds, starManager)
+        draw_active_game(WIN, player, platformManager, environment, timer_text, highScore_text, starManager)
+        
 
     return seconds
