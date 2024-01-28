@@ -1,6 +1,6 @@
 import pygame
 import random
-from config import SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT, SCROLL_SPEED
+from config import SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image_path):
@@ -15,8 +15,8 @@ class Platform(pygame.sprite.Sprite):
     def draw(self, window):
         window.blit(self.image, (self.rect.x, self.rect.y))
 
-    def update(self):
-        self.rect.y += SCROLL_SPEED
+    def update(self, scroll_speed):
+        self.rect.y += scroll_speed
 
 
 def create_small_platform(x, y):

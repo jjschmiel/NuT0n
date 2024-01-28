@@ -22,7 +22,9 @@ class PlatformManager():
         self.add_platform(0, 100)
         self.add_platform(PLAY_AREA_WIDTH // 2 - 20, 400)
 
-    
+    def setScrollSpeed(self, scroll_speed):
+        self.scroll_speed = scroll_speed
+
     def __init__(self):
         self.platforms = []
         self.pattern_makers = [
@@ -50,7 +52,7 @@ class PlatformManager():
             random.choice(self.pattern_makers)()
 
         for p in platforms:
-            p.update()
+            p.update(self.scroll_speed)
             if p.rect.y > HEIGHT:
                 platforms_to_remove.append(p)
         
