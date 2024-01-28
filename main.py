@@ -5,7 +5,7 @@ from GameObjects.FloorOrWall import FloorOrWall
 from GameObjects.Player import Player, create_player, player_images
 from GameObjects.Platform import Platform
 from GameObjects.Panel import Panel
-from config import WIDTH, HEIGHT, VELOCITY, GRAVITY, JUMP_VELOCITY, playerAnimationCounter, PLAYER_HEIGHT, PLAYER_WIDTH
+from config import WIDTH, HEIGHT, VELOCITY, GRAVITY, JUMP_VELOCITY, PLAYER_HEIGHT, PLAYER_WIDTH
 from scenes.titleScreen import run_title_screen
 
 # Initialize Pygame
