@@ -7,7 +7,7 @@ def run_game_over_screen(WIN):
     instruction_font = pygame.font.Font(None, 35)  # Choose the font for the instructions
 
     title = title_font.render("GAME OVER", True, (255, 255, 255))  # Create the title
-    instructions = instruction_font.render("Press any key to try agin", True, (255, 255, 255))  # Create the instructions
+    instructions = instruction_font.render("Press SPACE to try again", True, (255, 255, 255))  # Create the instructions
 
     # Load the image
 
@@ -17,12 +17,18 @@ def run_game_over_screen(WIN):
     WIN.blit(instructions, ((WIDTH - instructions.get_width()) // 2, HEIGHT // 2 - 70))  # Draw the instructions
 
     pygame.display.flip()  # Update the display
+    start_ticks = pygame.time.get_ticks()  # Starter tick
 
     waiting = True
     while waiting:  # Wait for the user to press a key
+        seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # Calculate how many seconds
+
+        if seconds > 3:  # If more than 3 seconds have passed
+            print("3 seconds have passed!")
+
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.KEYUP:  # This will trigger when a key is released
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE and seconds > 1:  # This will trigger when a key is released
                 waiting = False
