@@ -1,5 +1,6 @@
 from GameObjects.FloorOrWall import FloorOrWall
 from GameObjects.Panel import Panel
+from GameObjects.DeathVoid import DeathVoid
 from config import WIDTH, HEIGHT, WALL_WIDTH, WALL_HEIGHT, SCROLL_SPEED, PANEL_HEIGHT
 
 PANEL_SCREEN_HEIGHT_DIFF = HEIGHT - PANEL_HEIGHT
@@ -18,6 +19,7 @@ class Environment():
             Panel(100, -PANEL_HEIGHT + PANEL_SCREEN_HEIGHT_DIFF,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Panels/leftPanel.png'),
             Panel(WIDTH - 575, -PANEL_HEIGHT + PANEL_SCREEN_HEIGHT_DIFF,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Panels/rightPanel.png')
         ]
+        self.deathVoid = DeathVoid((WIDTH // 2) - 200, HEIGHT - 50, 450, 50, 'Assets/DeathVoid/deathVoid.gif')
     
     def update(self):
         wall_delete_list = []
@@ -47,3 +49,4 @@ class Environment():
             w.draw(WIN)
         for p in self.panels:
             p.draw(WIN)
+        self.deathVoid.draw(WIN)

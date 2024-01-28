@@ -21,6 +21,7 @@ class Player(pygame.Rect):
         self.canJump = True
         self.jumpClock = time.time()
         self.walking = False
+        self.alive = True
     
 
     def update_animation(self):
