@@ -18,8 +18,12 @@ def main():
 
     run_title_screen(WIN)
 
+    highScore = 0
+
     while True:
-        run_active_game(WIN, clock)
+        score = run_active_game(WIN, clock, highScore)
+        if score > highScore:
+            highScore = score
         run_game_over_screen(WIN)
 
 if __name__ == "__main__":
