@@ -10,7 +10,7 @@ class StarManager():
         self.time = time
 
     def update(self):
-        if self.time > 2:
+        if self.time > 32:
             starChance = random.randrange(100)
 
             if starChance < 10:
