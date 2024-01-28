@@ -10,7 +10,7 @@ from GameObjects.Environment import Environment
 import pygame
 import sys
 
-def run_active_game(WIN, clock):
+def run_active_game(WIN, clock, highScore):
     # Create the walls and floor
     leftWall = FloorOrWall(WIDTH // 2 - 250, HEIGHT - 1080,  WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
     rightWall = FloorOrWall(WIDTH // 2 + 250, HEIGHT - 1080, WALL_WIDTH, WALL_HEIGHT, 'Assets/Platform/platform1.png')
@@ -27,11 +27,24 @@ def run_active_game(WIN, clock):
 
     player = create_player()
 
+    start_ticks = pygame.time.get_ticks()  # Starter tick
+    font = pygame.font.Font(None, 36) # Font for timer
+
     while player.alive ==  True:
         clock.tick(60)  # Cap the frame rate at 60 FPS
+
+        # Calculate how many seconds
+        seconds = (pygame.time.get_ticks() - start_ticks) / 1000
+
+        # Render the timer text
+        timer_text = font.render(str(int(seconds)), True, (255, 255, 255))
+        highScore_text = font.render("HIGH SCORE: " + str(int(highScore)), True, (255, 255, 255))
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 pygame.quit()
                 sys.exit()
         update_active_game(player, platforms, environment)
-        draw_active_game(WIN, environment, player)
+        draw_active_game(WIN, environment, player, timer_text, highScore_text)
+
+    return seconds
