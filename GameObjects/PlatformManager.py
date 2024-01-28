@@ -45,7 +45,7 @@ class PlatformManager():
         platforms_to_remove = []
         need_new_platforms = True
         for p in platforms:
-            if p.rect.y < 0:
+            if p.rect.y < 100:
                 need_new_platforms = False
         
         if need_new_platforms:
