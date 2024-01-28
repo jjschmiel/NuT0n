@@ -8,9 +8,38 @@ import pygame
 import sys
 import math
 def run_active_game(WIN, clock, highScore):
+    playingLVL2Music = False
+    playingLVL3Music = False
+    playingLVL4Music = False
+    playingBeyondMusic = False
+
     pygame.mixer.init()  # Initialize the mixer module
-    pygame.mixer.music.load('Assets/Audio/LVL1.ogg')  # Load the music file
-    pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
+    pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
+    pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
+
+    def play_lvl2_music():
+        pygame.mixer.init()
+        pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
+        pygame.mixer.music.play()
+        pygame.mixer.music.set_pos(10)
+
+    def play_lvl3_music():
+        pygame.mixer.init()
+        pygame.mixer.music.load("Assets/Audio/LVL3.ogg")
+        pygame.mixer.music.play()
+        pygame.mixer.music.set_pos(20)
+
+    def play_lvl4_music():
+        pygame.mixer.init()
+        pygame.mixer.music.load("Assets/Audio/LVL4.ogg")
+        pygame.mixer.music.play()
+        pygame.mixer.music.set_pos(30)
+
+    def play_beyond_music():
+        pygame.mixer.init()
+        pygame.mixer.music.load("Assets/Audio/BEYOND.ogg")
+        pygame.mixer.music.play(-1)
+        pygame.mixer.music.set_pos(40)
 
     environment = Environment()
     platformManager = PlatformManager()
@@ -28,6 +57,24 @@ def run_active_game(WIN, clock, highScore):
 
         # Calculate how many seconds
         seconds = (pygame.time.get_ticks() - start_ticks) / 1000
+
+        if seconds >= 10 and playingLVL2Music == False:
+            play_lvl2_music()
+            playingLVL2Music = True
+
+        if seconds >= 20 and playingLVL3Music == False:
+            play_lvl3_music()
+            playingLVL3Music = True
+
+        if seconds >= 30 and playingLVL4Music == False:
+            play_lvl4_music()
+            playingLVL4Music = True
+
+        if seconds >= 40 and playingBeyondMusic == False:
+            play_beyond_music()
+            playingBeyondMusic = True
+
+
 
         if math.floor(seconds) % 5 == 0 and ready_to_increase:
             m_scroll_speed += 1
