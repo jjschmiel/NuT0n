@@ -10,4 +10,6 @@ def update_active_game(player, platforms, environment):
     player.update()
     environment.update()
     handle_collisions(player, platforms)
+    for p in platforms:
+        p.update()
     player.update_animation()
