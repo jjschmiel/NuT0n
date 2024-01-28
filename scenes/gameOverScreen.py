@@ -3,6 +3,9 @@ import sys
 from config import WIDTH, HEIGHT
 
 def run_game_over_screen(WIN):
+    pygame.mixer.init()  # Initialize the mixer module
+    pygame.mixer.music.load('Assets/Audio/LOSE.ogg')  # Load the music file
+    pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
     title_font = pygame.font.Font(None, 70)  # Choose the font for the title
     instruction_font = pygame.font.Font(None, 35)  # Choose the font for the instructions
 
@@ -22,9 +25,6 @@ def run_game_over_screen(WIN):
     waiting = True
     while waiting:  # Wait for the user to press a key
         seconds = (pygame.time.get_ticks() - start_ticks) / 1000  # Calculate how many seconds
-
-        if seconds > 3:  # If more than 3 seconds have passed
-            print("3 seconds have passed!")
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):

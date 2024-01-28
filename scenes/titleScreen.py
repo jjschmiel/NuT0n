@@ -3,6 +3,10 @@ import sys
 from config import WIDTH, HEIGHT
 
 def run_title_screen(WIN):
+    pygame.mixer.init()  # Initialize the mixer module
+    pygame.mixer.music.load('Assets/Audio/TITLE.ogg')  # Load the music file
+    pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
+
     title_font = pygame.font.Font(None, 70)  # Choose the font for the title
     instruction_font = pygame.font.Font(None, 35)  # Choose the font for the instructions
 

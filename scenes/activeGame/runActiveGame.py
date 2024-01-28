@@ -7,7 +7,9 @@ import pygame
 import sys
 
 def run_active_game(WIN, clock, highScore):
-
+    pygame.mixer.init()  # Initialize the mixer module
+    pygame.mixer.music.load('Assets/Audio/LVL1.ogg')  # Load the music file
+    pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
 
     environment = Environment()
     platformManager = PlatformManager()
