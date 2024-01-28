@@ -64,7 +64,13 @@ class Environment():
             del p
         
         if self.time > 35 and math.floor(self.time) % 2 == 0:
-            self.deathVoid.rect.y +=1
+            self.deathVoid0.rect.y +=1
+            self.deathVoid1.rect.y +=1
+            self.deathVoid2.rect.y +=1
+            self.deathVoid3.rect.y +=1
+            self.deathVoid4.rect.y +=1
+            self.deathVoid5.rect.y +=1
+            self.deathVoid6.rect.y +=1
 
 
 
