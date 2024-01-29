@@ -9,7 +9,9 @@ import config
 import pygame
 import sys
 import math
-def run_active_game(WIN, clock, highScore):
+import asyncio
+
+async def run_active_game(WIN, clock, highScore):
     playingLVL2Music = False
     playingLVL3Music = False
     playingLVL4Music = False
@@ -20,28 +22,20 @@ def run_active_game(WIN, clock, highScore):
     pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
 
     def play_lvl2_music():
-        pygame.mixer.init()
         pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
         pygame.mixer.music.play()
-        pygame.mixer.music.set_pos(10)
 
     def play_lvl3_music():
-        pygame.mixer.init()
         pygame.mixer.music.load("Assets/Audio/LVL3.ogg")
         pygame.mixer.music.play()
-        pygame.mixer.music.set_pos(20)
 
     def play_lvl4_music():
-        pygame.mixer.init()
         pygame.mixer.music.load("Assets/Audio/LVL4.ogg")
         pygame.mixer.music.play()
-        pygame.mixer.music.set_pos(30)
 
     def play_beyond_music():
-        pygame.mixer.init()
         pygame.mixer.music.load("Assets/Audio/BEYOND.ogg")
         pygame.mixer.music.play(-1)
-        pygame.mixer.music.set_pos(40)
 
     environment = Environment()
     platformManager = PlatformManager()
@@ -102,5 +96,5 @@ def run_active_game(WIN, clock, highScore):
         update_active_game(player, platformManager, environment, seconds, starManager)
         draw_active_game(WIN, player, platformManager, environment, timer_text, highScore_text, starManager)
         
-
+        await asyncio.sleep(0)
     return seconds

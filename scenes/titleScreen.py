@@ -1,16 +1,15 @@
 import pygame
 import sys
 from config import WIDTH, HEIGHT
+import asyncio
 
-def run_title_screen(WIN):
+async def run_title_screen(WIN):
     pygame.mixer.init()  # Initialize the mixer module
     pygame.mixer.music.load('Assets/Audio/TITLE.ogg')  # Load the music file
     pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
 
-    title_font = pygame.font.Font(None, 70)  # Choose the font for the title
     instruction_font = pygame.font.Font(None, 35)  # Choose the font for the instructions
 
-    title = title_font.render("My Game", True, (255, 255, 255))  # Create the title
     instructions = instruction_font.render("Press any key to start", True, (255, 255, 255))  # Create the instructions
 
     # Load the image
@@ -24,9 +23,11 @@ def run_title_screen(WIN):
 
     waiting = True
     while waiting:  # Wait for the user to press a key
+        pygame.display.flip()  # Update the display
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYUP:  # This will trigger when a key is released
                 waiting = False
+        await asyncio.sleep(0) 
