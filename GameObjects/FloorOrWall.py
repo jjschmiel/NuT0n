@@ -16,3 +16,6 @@ class FloorOrWall(pygame.sprite.Sprite):
         for i in range(0, width, image_width):
             for j in range(0, height, image_height):
                 self.image.blit(loaded_image, (i, j))
+
+    def draw(self, window):
+        window.blit(self.image, (self.rect.x, self.rect.y))
