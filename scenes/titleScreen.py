@@ -21,6 +21,9 @@ async def run_title_screen(WIN):
 
     pygame.display.flip()  # Update the display
 
+    old_win = WIN.copy()  # Save the current state of the window
+    #WIN.blit (old_win, (0, 0))  # Draw the old window on top of the current window
+
     waiting = True
     while waiting:  # Wait for the user to press a key
         pygame.display.flip()  # Update the display

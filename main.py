@@ -5,14 +5,14 @@ from scenes.gameOverScreen import run_game_over_screen
 import asyncio
 # Set up the environment
 # bg_x = 0
-#bg = pygame.image.load('background.png')  # Load your background image
+# bg = pygame.image.load('background.png')  # Load your background image
 
 
 async def main():
     pygame.mixer.pre_init(44100, 16, 2, 4096)
     pygame.init()
     clock = pygame.time.Clock()
-    WIN = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    WIN = pygame.display.set_mode((1920, 1080), pygame.RESIZABLE)
 
     await run_title_screen(WIN)
 
