@@ -1,5 +1,6 @@
 import pygame
 import random
+import uuid  # Import the uuid module
 from config import SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT
 
 class Platform(pygame.sprite.Sprite):
@@ -11,6 +12,7 @@ class Platform(pygame.sprite.Sprite):
         self.height = height
         self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect(topleft=(x, y))
+        self.id = uuid.uuid4()  # Generate a random UUID
 
     def draw(self, window):
         window.blit(self.image, (self.rect.x, self.rect.y))

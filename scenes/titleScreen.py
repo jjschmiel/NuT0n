@@ -3,7 +3,7 @@ import sys
 from config import WIDTH, HEIGHT
 import asyncio
 
-async def run_title_screen(WIN):
+def run_title_screen(WIN):
     pygame.mixer.init()  # Initialize the mixer module
     pygame.mixer.music.load('Assets/Audio/TITLE.ogg')  # Load the music file
     pygame.mixer.music.play(-1)  # Play the music, -1 means loop indefinitely
@@ -33,4 +33,4 @@ async def run_title_screen(WIN):
                 sys.exit()
             if event.type == pygame.KEYUP:  # This will trigger when a key is released
                 waiting = False
-        await asyncio.sleep(0) 
+        #await asyncio.sleep(0) 

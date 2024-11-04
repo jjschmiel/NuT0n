@@ -62,4 +62,5 @@ class PlatformManager():
 
     def draw(self, WIN):
         for p in self.platforms:
+            #print(f"ID: {p.id  } | x: {p.rect.x} | y: {p.rect.y}")
             p.draw(WIN)

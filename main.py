@@ -8,22 +8,25 @@ import asyncio
 # bg = pygame.image.load('background.png')  # Load your background image
 
 
-async def main():
+def main(skipTitle, nutonEnv=None):
+    print("Running main")
     pygame.mixer.pre_init(44100, 16, 2, 4096)
     pygame.init()
     clock = pygame.time.Clock()
     WIN = pygame.display.set_mode((1920, 1080), pygame.RESIZABLE)
 
-    await run_title_screen(WIN)
+    if not skipTitle:
+        run_title_screen(WIN)
 
     highScore = 0
 
     while True:
-        score = await run_active_game(WIN, clock, highScore)
+        score = run_active_game(WIN, clock, highScore, nutonEnv)
         if score > highScore:
             highScore = score
-        await run_game_over_screen(WIN)
-        await asyncio.sleep(0) 
-        
+        run_game_over_screen(WIN)
+        #sleep(0) 
 
-asyncio.run(main())
+if __name__ == "__main__":
+    main(skipTitle=False)
+

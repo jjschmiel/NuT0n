@@ -11,7 +11,8 @@ import sys
 import math
 import asyncio
 
-async def run_active_game(WIN, clock, highScore):
+def run_active_game(WIN, clock, highScore, nutonEnv=None):
+    print("Running active game")
     playingLVL2Music = False
     playingLVL3Music = False
     playingLVL4Music = False
@@ -96,5 +97,10 @@ async def run_active_game(WIN, clock, highScore):
         update_active_game(player, platformManager, environment, seconds, starManager)
         draw_active_game(WIN, player, platformManager, environment, timer_text, highScore_text, starManager)
         
-        await asyncio.sleep(0)
+        if nutonEnv is not None:
+            nutonEnv._state = 11
+            nutonEnv
+
+
+        #sleep(0)
     return seconds

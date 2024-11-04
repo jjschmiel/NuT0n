@@ -1,0 +1,4 @@
+model_checkpoint_path: "save-1"
+all_model_checkpoint_paths: "save-1"
+all_model_checkpoint_timestamps: 1730675283.972442
+last_preserved_timestamp: 1730675269.795518
