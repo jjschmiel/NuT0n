@@ -41,6 +41,7 @@ class PlatformManager():
         self.add_platform(0, -HEIGHT + 800)
 
     def update(self):
+        #print("platforms: {0}".format(self.platforms))
         platforms = self.platforms
         platforms_to_remove = []
         need_new_platforms = True
