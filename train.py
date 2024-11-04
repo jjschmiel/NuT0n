@@ -85,7 +85,6 @@ def compute_avg_return(environment, policy, num_episodes=10):
         episode_return = 0.0
 
         while not time_step.is_last():
-            print("Time Step: {0}".format(time_step))
             action_step = policy.action(time_step)
             time_step = environment.step(action_step.action)
             episode_return += time_step.reward
@@ -137,9 +136,9 @@ if __name__ == "__main__":
     print("Action Shape:", action.shape)
     print("Observation Shape:", observation.shape)
 
-    print("Evaluating base policy:")
-    pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
-    print("Base return: {0}\n".format(pre_train_avg))
+    #print("Evaluating base policy:")
+    #pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
+    #print("Base return: {0}\n".format(pre_train_avg))
 
     manager.save()
 

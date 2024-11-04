@@ -26,8 +26,8 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         pygame.init()  # Initialize the pygame module
         pygame.mixer.init()  # Initialize the mixer module
-        pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
-        pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
+        #pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
+        #pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
         self.WIN = pygame.display.set_mode((1920, 1080), pygame.RESIZABLE)
 
         def play_lvl2_music():
@@ -63,8 +63,12 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         self.star = Star(400, 400)
 
-        self._action_spec = array_spec.BoundedArraySpec(
-            shape=(2,), dtype=np.int32, minimum=0, maximum=2, name='action')
+        self._action_spec = {
+            'move': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
+            'jump': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=-1, maximum=1, name='jump')
+        }
         
         self._observation_spec = array_spec.BoundedArraySpec(
             shape=(1,), dtype=np.int32, minimum=0, name='observation')
@@ -76,8 +80,27 @@ class Nut0nEnv(py_environment.PyEnvironment):
     
 
     def _step(self, action):
+        print("action: {0}".format(action))
         if self.player.alive ==  False:
             return self.reset()
+        
+        if action['move'] == 0:
+            self.player.moveRight = False
+            self.player.moveLeft = False
+        
+        if action['move'] == 1:
+            self.player.moveRight = True
+            self.player.moveLeft = False
+
+        if action['move'] == 2:
+            self.player.moveRight = False
+            self.player.moveLeft = True
+
+        if action['jump'] == 0:
+            self.player.jump = False
+
+        if action['jump'] == 1:
+            self.player.jump = True
 
         self.clock.tick(60)  # Cap the frame rate at 60 FPS
 
@@ -125,7 +148,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         #sleep(0)
         if self.player.alive == False:
-            return ts.termination(np.array([self._state], dtype=np.int32), reward=-10)
+            return ts.termination(np.array([self._state], dtype=np.int32), reward=-100)
         else:
             return ts.transition(np.array([self._state], dtype=np.int32), reward=1.0)
         
@@ -139,8 +162,8 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.playingBeyondMusic = False
 
         pygame.mixer.init()  # Initialize the mixer module
-        pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
-        pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
+        #pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
+        #pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
 
         def play_lvl2_music():
             pygame.mixer.music.load("Assets/Audio/LVL2.ogg")

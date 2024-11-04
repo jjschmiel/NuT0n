@@ -22,6 +22,9 @@ class Player(pygame.Rect):
         self.jumpClock = time.time()
         self.walking = False
         self.alive = True
+        self.jump = False
+        self.moveLeft = False
+        self.moveRight = False
     
 
     def update_animation(self):
