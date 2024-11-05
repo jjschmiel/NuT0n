@@ -24,6 +24,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.playingLVL4Music = False
         self.playingBeyondMusic = False
 
+        self.RIGHT_EDGE_OF_PLAY_AREA = config.RIGHT_EDGE_OF_PLAY_AREA
+        self.LEFT_EDGE_OF_PLAY_AREA = config.LEFT_EDGE_OF_PLAY_AREA
+
+
         pygame.init()  # Initialize the pygame module
         pygame.mixer.init()  # Initialize the mixer module
         #pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
@@ -67,11 +71,12 @@ class Nut0nEnv(py_environment.PyEnvironment):
             'move': array_spec.BoundedArraySpec(
                 shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
             'jump': array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=-1, maximum=1, name='jump')
+                shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
         }
         
+        self.max_platforms = 0
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(15,), dtype=np.int32, minimum=0, name='observation')
+            shape=(self.max_platforms,), dtype=np.float32, minimum=0, name='observation')
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
@@ -149,7 +154,20 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 sys.exit()
 
         self.reward += self.seconds * 1.33
-        self.reward += (1000 - self.player.y) * (0.42 / 60) # 0.007
+        self.reward += (1000 - self.player.y) * (1/ 60) # 0.007
+        
+        if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
+            self.reward += -1
+
+        if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
+            self.reward += -1
+
+        if action['jump'] == 1:
+            self.reward += 0.5
+
+        for platform in self.platformManager.platforms:
+            if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
+                self.reward += 0.5
 
         #print("play y: {0}".format(1000 - self.player.y))
 
@@ -158,11 +176,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         #sleep(0)
         if self.player.alive == False:
-            self.reward += -100 + (0.6 * self.seconds)
-            #print("Reward: {0}".format(self.reward))
+            self.reward += -3 + (0.6 * self.seconds)
+            print("Reward: {0}".format(self.reward))
             return ts.termination(self._get_observation(), reward=self.reward)
         else:
-            #print("Reward: {0}".format(self.reward))
+            print("Reward: {0}".format(self.reward))
             return ts.transition(self._get_observation(), reward=self.reward)
         
     def _reset(self):
@@ -210,7 +228,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.m_scroll_speed = config.SCROLL_SPEED
 
         self.star = Star(400, 400)
-        return ts.restart(np.array([self._state], dtype=np.int32))
+        return ts.restart(self._get_observation())
     
     def observation_spec(self):
         print("**********in observation_spec***************")
@@ -221,25 +239,25 @@ class Nut0nEnv(py_environment.PyEnvironment):
         return self._action_spec
 
 
-def _get_observation(self):
-        # Get player position
-        player_pos = self.player.get_position()  # Assuming get_position() returns (x, y)
-
-        # Get platform positions
-        platform_pos = self.platformManager.platforms  # Assuming get_positions() returns a list of (x, y) tuples
-
+    def _get_observation(self):
         self.positions = []
+        # Get player and platform positions
 
-        self.positions.append(self.player.x, self.player.y)
-        
+        #self.positions.append([self.player.x, self.player.y] )
+
+        for platform in self.platformManager.platforms:
+              self.positions.append(platform.rect.x)
+
         # Pad platform positions with NaN if there are fewer than max_platforms
-        if len(platform_pos) < self.max_platforms:
-            padding = [(np.nan, np.nan)] * (self.max_platforms - len(platform_pos))
-            platform_pos.extend(padding)
+        if len(self.positions) < self.max_platforms:
+            padding = [(0)] * (self.max_platforms - len(self.positions))
+            self.positions.extend(padding)
+        elif len(self.positions) > self.max_platforms:
+            self.positions = self.positions[:self.max_platforms]
 
-        for platform in platform_pos:
-            self.positions.append(platform.x , platform.y)
-        
-        print("Positions: {0}".format(self.positions))
+        # Create observation dictionary
+        observation = {
+            'positions': np.array(self.positions, dtype=np.float32)
+        }
 
-        return self.positions
+        return observation
