@@ -32,13 +32,33 @@ class PlatformManager():
             self.create_pattern_2
         ]
 
-        self.add_platform(0, -HEIGHT + 200)
-        self.add_platform(200, -HEIGHT + 300)
-        self.add_platform(SM_PLAT_RIGHT_WALL_X, -HEIGHT + 200)
+        # self.add_platform(0, -HEIGHT + 200)
+        # self.add_platform(200, -HEIGHT + 300)
+        # self.add_platform(SM_PLAT_RIGHT_WALL_X, -HEIGHT + 200)
 
-        self.add_platform(SM_PLAT_RIGHT_WALL_X, -HEIGHT + 400)
-        self.add_platform(PLAY_AREA_WIDTH // 2 - 20, -HEIGHT + 600)
-        self.add_platform(0, -HEIGHT + 800)
+        # self.add_platform(SM_PLAT_RIGHT_WALL_X, -HEIGHT + 400)
+        # self.add_platform(PLAY_AREA_WIDTH // 2 - 20, -HEIGHT + 600)
+        # self.add_platform(0, -HEIGHT + 800)
+
+        self.add_platform(0, -HEIGHT + 400)
+        self.add_platform(100, -HEIGHT + 400)
+        self.add_platform(200, -HEIGHT + 400)
+        self.add_platform(300, -HEIGHT + 400)
+        self.add_platform(400, -HEIGHT + 400)
+
+        self.add_platform(0, -HEIGHT + 500)
+        self.add_platform(100, -HEIGHT + 500)
+        self.add_platform(300, -HEIGHT + 500)
+        self.add_platform(400, -HEIGHT + 500)
+
+        self.add_platform(0, -HEIGHT + 600)
+        self.add_platform(400, -HEIGHT + 600)
+
+        self.add_platform(100, -HEIGHT + 800)
+        self.add_platform(300, -HEIGHT + 800)
+
+        self.add_platform(0, -HEIGHT + 1000)
+        self.add_platform(400, -HEIGHT + 1000)
 
     def update(self):
         platforms = self.platforms

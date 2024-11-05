@@ -159,3 +159,7 @@ cython_debug/
 *-pygbag.???
 /build
 /dist
+
+/tmp
+
+tmp/*

@@ -71,16 +71,21 @@ class Nut0nEnv(py_environment.PyEnvironment):
         }
         
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(1,), dtype=np.int32, minimum=0, name='observation')
+            shape=(15,), dtype=np.int32, minimum=0, name='observation')
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
 
         self.highScore = 0
+
+        self.reward = 0
     
 
     def _step(self, action):
-        print("action: {0}".format(action))
+        #print("action: {0}".format(action))
+
+        self.reward = 0
+
         if self.player.alive ==  False:
             return self.reset()
         
@@ -143,14 +148,22 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.quit()
                 sys.exit()
 
+        self.reward += self.seconds * 1.33
+        self.reward += (1000 - self.player.y) * (0.42 / 60) # 0.007
+
+        #print("play y: {0}".format(1000 - self.player.y))
+
         update_active_game(self.player, self.platformManager, self.environment, self.seconds, self.starManager)
         draw_active_game(self.WIN, self.player, self.platformManager, self.environment, self.timer_text, self.highScore_text, self.starManager)
 
         #sleep(0)
         if self.player.alive == False:
-            return ts.termination(np.array([self._state], dtype=np.int32), reward=-100)
+            self.reward += -100 + (0.6 * self.seconds)
+            #print("Reward: {0}".format(self.reward))
+            return ts.termination(self._get_observation(), reward=self.reward)
         else:
-            return ts.transition(np.array([self._state], dtype=np.int32), reward=1.0)
+            #print("Reward: {0}".format(self.reward))
+            return ts.transition(self._get_observation(), reward=self.reward)
         
     def _reset(self):
         self._state = 0
@@ -206,3 +219,27 @@ class Nut0nEnv(py_environment.PyEnvironment):
     def action_spec(self):
         print("**********in action_spec***************")
         return self._action_spec
+
+
+def _get_observation(self):
+        # Get player position
+        player_pos = self.player.get_position()  # Assuming get_position() returns (x, y)
+
+        # Get platform positions
+        platform_pos = self.platformManager.platforms  # Assuming get_positions() returns a list of (x, y) tuples
+
+        self.positions = []
+
+        self.positions.append(self.player.x, self.player.y)
+        
+        # Pad platform positions with NaN if there are fewer than max_platforms
+        if len(platform_pos) < self.max_platforms:
+            padding = [(np.nan, np.nan)] * (self.max_platforms - len(platform_pos))
+            platform_pos.extend(padding)
+
+        for platform in platform_pos:
+            self.positions.append(platform.x , platform.y)
+        
+        print("Positions: {0}".format(self.positions))
+
+        return self.positions

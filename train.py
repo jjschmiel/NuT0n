@@ -88,6 +88,8 @@ def compute_avg_return(environment, policy, num_episodes=10):
             action_step = policy.action(time_step)
             time_step = environment.step(action_step.action)
             episode_return += time_step.reward
+            print("Episode return: {0}".format(episode_return))
+
         total_return += episode_return
 
     Env.graphics = False
