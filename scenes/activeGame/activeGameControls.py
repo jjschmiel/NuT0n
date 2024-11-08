@@ -9,22 +9,20 @@ def active_game_controls(player):
 
     player.walking = False
 
-    keys = pygame.key.get_pressed()
-
-    if keys[pygame.K_LEFT] or player.moveLeft:
+    if player.moveLeft:
         if LOG_KEY_INPUTS:
             print('LEFT')
         player.facingRight = False
         player.walking = True
         player.x -= VELOCITY
-    if keys[pygame.K_RIGHT] or player.moveRight:
+    if player.moveRight:
         if LOG_KEY_INPUTS:
             print('RIGHT')
         player.facingRight = True
         player.walking = True
         player.x += VELOCITY
         
-    if keys[pygame.K_SPACE] or player.jump:
+    if player.jump:
         if LOG_KEY_INPUTS:
             print('SPACE')
         if player.jumping:

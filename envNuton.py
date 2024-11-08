@@ -34,21 +34,21 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
         self.WIN = pygame.display.set_mode((1920, 1080), pygame.RESIZABLE)
 
-        def play_lvl2_music():
-            pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
-            pygame.mixer.music.play()
+        # def play_lvl2_music(self):
+        #     pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
+        #     pygame.mixer.music.play()
 
-        def play_lvl3_music():
-            pygame.mixer.music.load("Assets/Audio/LVL3.ogg")
-            pygame.mixer.music.play()
+        # def play_lvl3_music():
+        #     pygame.mixer.music.load("Assets/Audio/LVL3.ogg")
+        #     pygame.mixer.music.play()
 
-        def play_lvl4_music():
-            pygame.mixer.music.load("Assets/Audio/LVL4.ogg")
-            pygame.mixer.music.play()
+        # def play_lvl4_music():
+        #     pygame.mixer.music.load("Assets/Audio/LVL4.ogg")
+        #     pygame.mixer.music.play()
 
-        def play_beyond_music():
-            pygame.mixer.music.load("Assets/Audio/BEYOND.ogg")
-            pygame.mixer.music.play(-1)
+        # def play_beyond_music():
+        #     pygame.mixer.music.load("Assets/Audio/BEYOND.ogg")
+        #     pygame.mixer.music.play(-1)
 
         self.environment = Environment()
         self.platformManager = PlatformManager()
@@ -74,9 +74,9 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
         }
         
-        self.max_platforms = 0
+        self.max_platforms = 15
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(self.max_platforms,), dtype=np.float32, minimum=0, name='observation')
+            shape=(self.max_platforms,2), dtype=np.float32, minimum=0, name='observation')
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
@@ -94,11 +94,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
         if self.player.alive ==  False:
             return self.reset()
         
-        if action['move'] == 0:
+        if action['move'] == 1:
             self.player.moveRight = False
             self.player.moveLeft = False
         
-        if action['move'] == 1:
+        if action['move'] == 0:
             self.player.moveRight = True
             self.player.moveLeft = False
 
@@ -117,21 +117,21 @@ class Nut0nEnv(py_environment.PyEnvironment):
         # Calculate how many seconds
         self.seconds = (pygame.time.get_ticks() - self.start_ticks) / 1000
 
-        if self.seconds >= 10 and self.playingLVL2Music == False:
-            self.play_lvl2_music()
-            self.playingLVL2Music = True
+        # if self.seconds >= 10 and self.playingLVL2Music == False:
+        #     self.play_lvl2_music(self)
+        #     self.playingLVL2Music = True
 
-        if self.seconds >= 20 and self.playingLVL3Music == False:
-            self.play_lvl3_music()
-            self.playingLVL3Music = True
+        # if self.seconds >= 20 and self.playingLVL3Music == False:
+        #     self.play_lvl3_music()
+        #     self.playingLVL3Music = True
 
-        if self.seconds >= 30 and self.playingLVL4Music == False:
-            self.play_lvl4_music()
-            self.playingLVL4Music = True
+        # if self.seconds >= 30 and self.playingLVL4Music == False:
+        #     self.play_lvl4_music()
+        #     self.playingLVL4Music = True
 
-        if self.seconds >= 40 and self.playingBeyondMusic == False:
-            self.play_beyond_music()
-            self.playingBeyondMusic = True
+        # if self.seconds >= 40 and self.playingBeyondMusic == False:
+        #     self.play_beyond_music()
+        #     self.playingBeyondMusic = True
 
         if math.floor(self.seconds) % 10 == 0 and self.ready_to_increase:
             self.m_scroll_speed += 1
@@ -177,10 +177,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #sleep(0)
         if self.player.alive == False:
             self.reward += -3 + (0.6 * self.seconds)
-            print("Reward: {0}".format(self.reward))
+            #print("Reward: {0}".format(self.reward))
             return ts.termination(self._get_observation(), reward=self.reward)
         else:
-            print("Reward: {0}".format(self.reward))
+            #print("Reward: {0}".format(self.reward))
             return ts.transition(self._get_observation(), reward=self.reward)
         
     def _reset(self):
@@ -196,7 +196,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
         #pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
 
-        def play_lvl2_music():
+        def play_lvl2_music(self):
             pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
             pygame.mixer.music.play()
 
@@ -231,11 +231,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
         return ts.restart(self._get_observation())
     
     def observation_spec(self):
-        print("**********in observation_spec***************")
+        #print("**********in observation_spec***************")
         return self._observation_spec
     
     def action_spec(self):
-        print("**********in action_spec***************")
+        #print("**********in action_spec***************")
         return self._action_spec
 
 
@@ -246,7 +246,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #self.positions.append([self.player.x, self.player.y] )
 
         for platform in self.platformManager.platforms:
-              self.positions.append(platform.rect.x)
+              self.positions.append({platform.rect.x, platform.rect.y})
+              print("platform x: {0}".format(platform.rect.x))
+
+        #print("platforms: {0}".format(self.platformManager.platforms))
 
         # Pad platform positions with NaN if there are fewer than max_platforms
         if len(self.positions) < self.max_platforms:
@@ -259,5 +262,6 @@ class Nut0nEnv(py_environment.PyEnvironment):
         observation = {
             'positions': np.array(self.positions, dtype=np.float32)
         }
+        #print("Observation: {0}".format(observation))
 
         return observation

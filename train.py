@@ -10,7 +10,9 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.networks import actor_distribution_network
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.trajectories import trajectory
+from tf_agents.trajectories import policy_step
 import numpy as np
+import pygame
 
 # suppress warning about CPU usage
 import os
@@ -21,7 +23,7 @@ BREAKOUT_REWARD = 1500
 # Hyper parameters
 num_iterations = 1000  # @param {type:"integer"}
 collect_episodes_per_iteration = 2  # @param {type:"integer"}
-replay_buffer_capacity = 2000  # @param {type:"integer"}
+replay_buffer_capacity = 20000  # @param {type:"integer"}
 
 FC_LAYER_PARAMS = (200, 100)
 
@@ -31,6 +33,8 @@ eval_interval = 50  # @param {type:"integer"}
 save_interval = 50
 
 tf.compat.v1.enable_v2_behavior()
+
+
 
 t_env = Env()
 e_env = Env()
@@ -72,6 +76,42 @@ tf_agent.initialize()
 eval_policy = tf_agent.policy
 collect_policy = tf_agent.collect_policy
 
+def collect_manual_experience(environment, replay_buffer, num_steps):
+    environment.reset()
+    time_step = environment.current_time_step()
+
+    for _ in range(num_steps):
+        move = 1
+        jump = 0
+        keys = pygame.key.get_pressed()
+
+        if keys[pygame.K_LEFT]:
+            move = 2
+        if keys[pygame.K_RIGHT]:
+            move = 0
+        if keys[pygame.K_SPACE]:
+            jump = 1
+
+        action = {'move': np.array([move], dtype=np.int32), 'jump': np.array([jump], dtype=np.int32)}
+
+        action_step = policy_step.PolicyStep(action=action, state=(), info=())
+
+        next_time_step = environment.step(action_step)
+        #print("Next Time Step: {0}".format(next_time_step))
+        #print("Time Step: {0}".format(time_step))  
+        traj = trajectory.from_transition(time_step, action_step, next_time_step)
+
+        #print("Trajectory: {0}".format(traj))
+
+        # Add trajectory to the replay buffer
+        replay_buffer.add_batch(traj)
+
+        time_step = next_time_step
+
+        if next_time_step.is_last():
+            environment.reset()
+            time_step = environment.current_time_step()
+
 
 def compute_avg_return(environment, policy, num_episodes=10):
     total_return = 0.0
@@ -88,7 +128,7 @@ def compute_avg_return(environment, policy, num_episodes=10):
             action_step = policy.action(time_step)
             time_step = environment.step(action_step.action)
             episode_return += time_step.reward
-            print("Episode return: {0}".format(episode_return))
+            #print("Episode return: {0}".format(episode_return))
 
         total_return += episode_return
 
@@ -112,6 +152,7 @@ def collect_episode(environment, policy, num_episodes):
     while episode_counter < num_episodes:
         time_step = environment.current_time_step()
         action_step = policy.action(time_step)
+        #print("Action Step: {0}".format(action_step))
         next_time_step = environment.step(action_step.action)
         traj = trajectory.from_transition(time_step, action_step,
                                           next_time_step)
@@ -128,15 +169,18 @@ if __name__ == "__main__":
     # Reset the train step
     tf_agent.train_step_counter.assign(0)
 
-    print("Action Spec:", eval_env.action_spec())
-    print("Observation Spec:", eval_env.observation_spec())
+    #print("Action Spec:", eval_env.action_spec())
+    #print("Observation Spec:", eval_env.observation_spec())
 
     # Example data
     action = np.array(1, dtype=np.int32)
     observation = np.array([0], dtype=np.int32)
 
-    print("Action Shape:", action.shape)
-    print("Observation Shape:", observation.shape)
+    #print("Action Shape:", action.shape)
+    #print("Observation Shape:", observation.shape)
+
+    print("Collecting manual experience data...")
+    collect_manual_experience(train_env, replay_buffer, num_steps=10000) 
 
     #print("Evaluating base policy:")
     #pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
@@ -196,3 +240,4 @@ if __name__ == "__main__":
         episode = (i + 1) * eval_interval
         print("Greedy at episode {0}: reward = {1}".format(episode, greedy[i]))
         print("Collection at episode {0}: reward = {1}".format(episode, collect[i]))
+
