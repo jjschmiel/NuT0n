@@ -74,9 +74,9 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
         }
         
-        self.max_platforms = 15
+        self.max_platforms = 0
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(self.max_platforms,2), dtype=np.float32, minimum=0, name='observation')
+            shape=(self.max_platforms,), dtype=np.float32, minimum=0, name='observation')
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
@@ -153,7 +153,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.quit()
                 sys.exit()
 
-        self.reward += self.seconds * 1.33
+        self.reward += self.seconds * -0.6
         self.reward += (1000 - self.player.y) * (1/ 60) # 0.007
         
         if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
@@ -163,7 +163,9 @@ class Nut0nEnv(py_environment.PyEnvironment):
             self.reward += -1
 
         if action['jump'] == 1:
-            self.reward += 0.5
+            self.reward += 1.5
+
+        #self.reward -= abs(self.player.x - 960) * 0.004
 
         for platform in self.platformManager.platforms:
             if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
@@ -177,11 +179,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #sleep(0)
         if self.player.alive == False:
             self.reward += -3 + (0.6 * self.seconds)
-            #print("Reward: {0}".format(self.reward))
-            return ts.termination(self._get_observation(), reward=self.reward)
+            print("Reward: {0}".format(self.reward))
+            return ts.termination(observation=self._get_observation(), reward=self.reward)
         else:
             #print("Reward: {0}".format(self.reward))
-            return ts.transition(self._get_observation(), reward=self.reward)
+            return ts.transition(observation=self._get_observation(), reward=self.reward)
         
     def _reset(self):
         self._state = 0
@@ -228,7 +230,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.m_scroll_speed = config.SCROLL_SPEED
 
         self.star = Star(400, 400)
-        return ts.restart(self._get_observation())
+        return ts.restart(observation=self._get_observation())
     
     def observation_spec(self):
         #print("**********in observation_spec***************")
@@ -243,23 +245,23 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.positions = []
         # Get player and platform positions
 
-        #self.positions.append([self.player.x, self.player.y] )
+        #self.positions.append([self.player.x] )
+
+        i = 1
 
         for platform in self.platformManager.platforms:
-              self.positions.append({platform.rect.x, platform.rect.y})
-              print("platform x: {0}".format(platform.rect.x))
-
-        #print("platforms: {0}".format(self.platformManager.platforms))
+              if i < self.max_platforms:
+                  self.positions.append([platform.x])
+                  i += 1
 
         # Pad platform positions with NaN if there are fewer than max_platforms
         if len(self.positions) < self.max_platforms:
-            padding = [(0)] * (self.max_platforms - len(self.positions))
+            padding = [(0, 0)] * (self.max_platforms - len(self.positions))
             self.positions.extend(padding)
-        elif len(self.positions) > self.max_platforms:
-            self.positions = self.positions[:self.max_platforms]
 
         # Create observation dictionary
         observation = {
+            #'player_position': np.array(player_pos, dtype=np.float32),
             'positions': np.array(self.positions, dtype=np.float32)
         }
         #print("Observation: {0}".format(observation))

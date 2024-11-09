@@ -29,8 +29,18 @@ class PlatformManager():
         self.platforms = []
         self.pattern_makers = [
             self.create_pattern_1,
-            self.create_pattern_2
+            self.create_pattern_2,
+            self.create_pattern_1,
+            self.create_pattern_1,
+            self.create_pattern_2,
+            self.create_pattern_1,
+            self.create_pattern_2,
+            self.create_pattern_1,
+            self.create_pattern_2,
+            self.create_pattern_2,
         ]
+
+        self.platformToUse = 0
 
         # self.add_platform(0, -HEIGHT + 200)
         # self.add_platform(200, -HEIGHT + 300)
@@ -69,7 +79,11 @@ class PlatformManager():
                 need_new_platforms = False
         
         if need_new_platforms:
-            random.choice(self.pattern_makers)()
+            self.pattern_makers[self.platformToUse]()
+            if self.platformToUse == len(self.pattern_makers) - 1:
+                self.platformToUse = 0
+            else: 
+                self.platformToUse += 1
 
         for p in platforms:
             p.update(self.scroll_speed)

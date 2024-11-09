@@ -27,10 +27,11 @@ replay_buffer_capacity = 20000  # @param {type:"integer"}
 
 FC_LAYER_PARAMS = (200, 100)
 
-learning_rate = 0.001  # @param {type:"number"}
+learning_rate = 0.1  # @param {type:"number"}
 num_eval_episodes = 5  # @param {type:"integer"}
 eval_interval = 50  # @param {type:"integer"}
 save_interval = 50
+epsilon = 0.8
 
 tf.compat.v1.enable_v2_behavior()
 
@@ -48,7 +49,7 @@ actor_net = actor_distribution_network.ActorDistributionNetwork(
     fc_layer_params=FC_LAYER_PARAMS
 )
 
-optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)
+optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=learning_rate)#, epsilon=epsilon)
 train_step_counter = tf.compat.v2.Variable(0)
 
 pre_train_checkpoint = tf.train.Checkpoint(actor_net=actor_net,
@@ -180,7 +181,7 @@ if __name__ == "__main__":
     #print("Observation Shape:", observation.shape)
 
     print("Collecting manual experience data...")
-    collect_manual_experience(train_env, replay_buffer, num_steps=10000) 
+    #collect_manual_experience(train_env, replay_buffer, num_steps=10000) 
 
     #print("Evaluating base policy:")
     #pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
@@ -208,8 +209,8 @@ if __name__ == "__main__":
 
         print("Training episode: {0}".format(step))
 
-        if step % save_interval == 0:
-            manager.save()
+        #if step % save_interval == 0:
+        manager.save()
 
         if step % eval_interval == 0:
             print("\n___Policy Evaluation___")
