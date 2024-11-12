@@ -10,24 +10,7 @@ from tf_agents.environments import tf_py_environment
 from tf_agents.networks import actor_distribution_network
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.trajectories import trajectory
-from tf_agents.trajectories import policy_step
-from tf_agents.specs import tensor_spec
-from tf_agents.replay_buffers import reverb_replay_buffer
-from tf_agents.replay_buffers import reverb_utils
-from tf_agents.policies import py_tf_eager_policy
-from tf_agents.drivers import py_driver
-from tf_agents.replay_buffers import py_uniform_replay_buffer
-from tf_agents.drivers import dynamic_step_driver
-import tf_agents
-from tf_agents.specs import array_spec
-
-import tf_agents.policies as policies
-import numpy as np
-import pygame
-import reverb
-
-# Keep using keras-2 (tf-keras) rather than keras-3 (keras).
-
+from tf_agents.policies import epsilon_greedy_policy
 
 # suppress warning about CPU usage
 import os
@@ -38,20 +21,17 @@ BREAKOUT_REWARD = 1500000
 
 # Hyper parameters
 num_iterations = 1000  # @param {type:"integer"}
-collect_episodes_per_iteration = 10  # @param {type:"integer"}
-replay_buffer_capacity = 2000  # @param {type:"integer"}
+collect_episodes_per_iteration = 1  # @param {type:"integer"}
+replay_buffer_capacity = 6000  # @param {type:"integer"}
 
 FC_LAYER_PARAMS = (200, 100) #a tuple of ints representing the sizes of each hidden layer
 
-learning_rate = 0.001  # @param {type:"number"}
+learning_rate = 0.01  # @param {type:"number"}
 num_eval_episodes = 5  # @param {type:"integer"}
 eval_interval = 10  # @param {type:"integer"}
 save_interval = 10
-epsilon = 0.0000001
-
+epsilon = 0.1
 tf.compat.v1.enable_v2_behavior()
-
-
 
 t_env = Env()
 e_env = Env()
@@ -88,10 +68,22 @@ tf_agent = reinforce_agent.ReinforceAgent(
     train_step_counter=train_step_counter
 )
 
+
+
 tf_agent.initialize()
 
 eval_policy = tf_agent.policy
-collect_policy = tf_agent.collect_policy
+# collect_policy = tf_agent.collect_policy
+
+collect_policy = epsilon_greedy_policy.EpsilonGreedyPolicy(
+    policy=tf_agent.collect_policy,
+    epsilon=epsilon
+)
+# eval_policy = epsilon_greedy_policy.EpsilonGreedyPolicy(
+#     policy=tf_agent.policy,
+#     epsilon=epsilon
+# )
+
 
 def compute_avg_return(environment, policy, num_episodes=10):
     total_return = 0.0
@@ -108,7 +100,6 @@ def compute_avg_return(environment, policy, num_episodes=10):
             action_step = policy.action(time_step)
             time_step = environment.step(action_step.action)
             episode_return += time_step.reward
-            #print("Episode return: {0}".format(episode_return))
         total_return += episode_return
 
     Env.graphics = False
@@ -116,28 +107,7 @@ def compute_avg_return(environment, policy, num_episodes=10):
 
     return avg_return.numpy()[0]
 
-data_spec =  (
-        tf.TensorSpec([1], tf.int32, 'step_type123'),
-        tf.TensorSpec([1,2], tf.int64, 'observation'),
-        tf.TensorSpec([1], tf.int32, 'move'),
-        tf.TensorSpec([1], tf.int32, 'jump'),
-        tf.TensorSpec([1], tf.int32, 'next_step_type'),
-        tf.TensorSpec([1], tf.float32, 'reward'),
-        tf.TensorSpec([1], tf.float32, 'discount'),
-)
-
-ds = tf_agents.trajectories.Trajectory(
-    step_type = tf.TensorSpec([1], tf.int32, 'step_type'),
-    observation = tf.TensorSpec([1,2], tf.int64, 'observation'),
-    action = {tf.TensorSpec([1], tf.int32, 'move'),
-        tf.TensorSpec([1], tf.int32, 'jump')},
-    policy_info = (),
-    next_step_type = tf.TensorSpec([1], tf.int32, 'next_step_type'),
-    reward = tf.TensorSpec([1], tf.float32, 'reward'),
-    discount = tf.TensorSpec([1], tf.float32, 'discount')
-)
-
-py_collect_data_spec = tensor_spec.to_array_spec(tf_agent.collect_data_spec)
+print("train_env.batch_size: {0}".format(train_env.batch_size))
 
 #OLD REPLAY BUFFER
 replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
@@ -146,51 +116,29 @@ replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
     max_length=replay_buffer_capacity
 )
 
-print("replay_buffer data spec: {0}".format(replay_buffer.data_spec))
-print("tf_agent.collect_data_spec: {0}".format(tf_agent.collect_data_spec))
-print("data spec: {0}".format(data_spec))
 
-# Add an observer that adds to the replay buffer:
-# replay_observer = [replay_buffer.add_batch]
-
-# collect_steps_per_iteration = 10
-# collect_op = dynamic_step_driver.DynamicStepDriver(
-#   train_env,
-#   tf_agent.collect_policy,
-#   observers=replay_observer,
-#   num_steps=collect_steps_per_iteration).run()
-
-#OLD COLLECT EPISODE
 def collect_episode(environment, policy, num_episodes):
     episode_counter = 0
     environment.reset()
+    totalReward = 0
 
     while episode_counter < num_episodes:
         time_step = environment.current_time_step()
         action_step = policy.action(time_step)
-        #print("Action Step: {0}".format(action_step))
         next_time_step = environment.step(action_step.action)
         traj = trajectory.from_transition(time_step, action_step,
                                           next_time_step)
-        print("Trajectory: {0}".format(traj))
+        #print("Trajectory: {0}".format(traj))
         
         # Add trajectory to the replay buffer
         replay_buffer.add_batch(traj)
+        #print("reward: {0}".format(time_step.reward))
 
+        totalReward += time_step.reward
         if traj.is_boundary():
             episode_counter += 1
 
-# def collect_episode(environment, policy, num_episodes):
-#     print("Collecting episode...")
-#     driver = py_driver.PyDriver(
-#         environment,
-#         py_tf_eager_policy.PyTFEagerPolicy(
-#         policy, use_tf_function=True),
-#         [r],
-#         max_episodes=num_episodes)
-#     initial_time_step = environment.reset()
-#     driver.run(initial_time_step)
-
+    print("Episode {1} Total reward: {0}".format(totalReward, episode_counter))
 
 # BEGIN TRAINING
 if __name__ == "__main__":
@@ -206,7 +154,7 @@ if __name__ == "__main__":
     greedy = []
     collect = []
 
-    # Evaluate the agent's policy once before training.
+    # #Evaluate the agent's policy once before training.
     # avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
     # returns = [avg_return]
     returns = []
@@ -221,6 +169,8 @@ if __name__ == "__main__":
         # Use data from the buffer and update the agent's network.
         experience = replay_buffer.gather_all()
         train_loss = tf_agent.train(experience=experience)
+        print("replay_buffer.num_frames: {0}".format(replay_buffer.num_frames()))
+        print("Replay buffer clearing...")
         replay_buffer.clear()
 
         step = tf_agent.train_step_counter.numpy()
@@ -233,57 +183,30 @@ if __name__ == "__main__":
             print('step = {0}: Average Return = {1}'.format(step, avg_return))
             returns.append(avg_return)
 
+        step = tf_agent.train_step_counter.numpy()
 
-    # OLD TRAINING LOOP
-    # for _ in range(num_iterations):
+        if step % save_interval == 0:
+            manager.save()
 
-    #     # Collect a few episodes using collect_policy and save to the replay buffer.
-    #     collect_episode(train_env, tf_agent.collect_policy,
-    #                     collect_episodes_per_iteration)
+        # if step % eval_interval == 0:
+        #     print("\n___Policy Evaluation___")
+        #     print('step = {0}: loss = {1}'.format(step, train_loss.loss))
+        #     print("Evaluating Greedy Policy...")
+        #     avg_greedy =  (eval_env, tf_agent.policy)
+        #     print('step = {0}: Greedy Avg Return = {1}'.format(step, avg_greedy))
+        #     greedy.append(avg_greedy)
+        #     print("Evaluating Collection Policy...")
+        #     avg_collect = compute_avg_return(train_env, tf_agent.collect_policy)
+        #     print(
+        #         'step = {0}: Collection Avg Return = {1}'.format(step, avg_collect))
+        #     collect.append(avg_greedy)
+        #     print("___Resuming Training___\n")
 
-    #     # Use data from the buffer and update the agent's network.
-    #     #print("replay_buffer.batch_size: {0}".format(replay_buffer._batch_size))
-    #     experience = replay_buffer.gather_all()
-    #     #print("reward: {0}".format(experience.reward.sum()))
-    #     x = 0.0
-    #     interations = 0
-    #     for y in experience.reward:
-    #         for z in y:
-    #             interations += 1
-    #             print("Reward {1}: {0}".format(z, interations))
-    #             x += z
-    #     print("{1} Total Iteration Reward: {0}".format(x, interations))
-
-    #     train_loss = tf_agent.train(experience)
-    #     #print("train loss: {0}".format(train_loss))
-    #     replay_buffer.clear()
-
-    #     step = tf_agent.train_step_counter.numpy()
-
-    #     print("Training episode: {0}".format(step))
-
-    #     #if step % save_interval == 0:
-    #     manager.save()
-
-    #     if step % eval_interval == 0:
-    #         print("\n___Policy Evaluation___")
-    #         print('step = {0}: loss = {1}'.format(step, train_loss.loss))
-    #         print("Evaluating Greedy Policy...")
-    #         avg_greedy =  (eval_env, tf_agent.policy)
-    #         print('step = {0}: Greedy Avg Return = {1}'.format(step, avg_greedy))
-    #         greedy.append(avg_greedy)
-    #         print("Evaluating Collection Policy...")
-    #         avg_collect = compute_avg_return(train_env, tf_agent.collect_policy)
-    #         print(
-    #             'step = {0}: Collection Avg Return = {1}'.format(step, avg_collect))
-    #         collect.append(avg_greedy)
-    #         print("___Resuming Training___\n")
-
-    #         # Breakout of training if reward > BREAKOUT_REWARD
-    #         print("average greedy: {0}".format(avg_greedy))
-    #         print("BREAKOUT REWARD: {0}".format(BREAKOUT_REWARD))
-    #         if avg_greedy > BREAKOUT_REWARD:
-    #             break
+        #     # Breakout of training if reward > BREAKOUT_REWARD
+        #     print("average greedy: {0}".format(avg_greedy))
+        #     print("BREAKOUT REWARD: {0}".format(BREAKOUT_REWARD))
+        #     if avg_greedy > BREAKOUT_REWARD:
+        #         break
 
     train_env.close()
     eval_env.close()

@@ -68,40 +68,17 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.m_scroll_speed = config.SCROLL_SPEED
 
         self.star = Star(400, 400)
-
-        # OLD CODE
-        
-        
-
-        
-        
-        # self.max_platforms = 0
-        # self._observation_spec = array_spec.BoundedArraySpec(
-        #     shape=(2,), dtype=np.float32, minimum=0, name='observation')
-
-        # self._action_spec = array_spec.BoundedArraySpec(
-        #     shape=(2,), dtype=np.float32, minimum=2, name='move')
         
         self.max_platforms = 0
-        
+        self.seconds = (pygame.time.get_ticks() - self.start_ticks) / 1000
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
 
         self.highScore = 0
 
-        #self.reward = 0
         self._observation_spec = array_spec.ArraySpec(
-            shape=(2,), dtype=np.int64, name='observation')
-        
-        # self._observation_spec =  {
-        # 'step_type': array_spec.ArraySpec(shape=(1,), dtype=np.int32),
-        # 'next_step_type': array_spec.ArraySpec(shape=(1,), dtype=np.int32),
-        # 'reward': array_spec.ArraySpec(shape=(1,), dtype=np.float32),
-        # 'discount': array_spec.ArraySpec(shape=(1,), dtype=np.float32),
-        # 'observation': array_spec.ArraySpec(
-        #     shape=(1,2), dtype=np.int64, name='observation')
-        # }
+            shape=(1,), dtype=np.float64, name='observation')
         
         self._time_step_spec = ts.time_step_spec(self.observation_spec())
         self._action_spec = {
@@ -111,15 +88,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
         }
 
-        self._reward_spec = array_spec.BoundedArraySpec(
-            shape=(2,), dtype=np.int64, minimum=-100, maximum=100, name='reward')
-
-
-    
+        # self._reward_spec = array_spec.BoundedArraySpec(
+        #     shape=(2,), dtype=np.int64, minimum=-100, maximum=100, name='reward')
 
     def _step(self, action):
-        #print("action: {0}".format(action))
-
         self.reward = 0
 
         if self.player.alive ==  False:
@@ -184,37 +156,51 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.quit()
                 sys.exit()
 
-        self.reward += self.seconds * 1.0 #encourage player to 
-        self.reward += (1000 - self.player.y) * (1/ 60) 
+        #REWARDS
+
+        #Reward for how long you don't die
+        self.reward += self.seconds * 1.33
         
-        if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
-            self.reward += -50
+        #Reward for how high you get
+        self.reward += (1000 - self.player.y) * 0.42 
 
-        if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
-            self.reward += -50
-
+        #Reward for being in the center
+        #self.reward -= abs(self.player.x - 960) * 0.06
+        
+        #Reward for jumping
         if action['jump'] == 1:
-            self.reward += 250
+            self.reward += 5
 
         #self.reward -= abs(self.player.x - 960) * 0.004
 
         for platform in self.platformManager.platforms:
             if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
-                self.reward -= 0.5
+                #print("touching platform")
+                self.reward += (1000 - platform.y) * 0.5
 
-        #print("play y: {0}".format(1000 - self.player.y))
+        #print("play y: {0}".format(self.player.y))
+
+        #Penalty for touching the right wall
+        if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
+            self.reward += -100
+            #return ts.termination(observation=self._get_observation(), reward=self.reward)
+
+        #Penalty for touching the left wall
+        if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
+            self.reward += -100
+            #return ts.termination(observation=self._get_observation(), reward=self.reward)
 
         update_active_game(self.player, self.platformManager, self.environment, self.seconds, self.starManager)
         draw_active_game(self.WIN, self.player, self.platformManager, self.environment, self.timer_text, self.highScore_text, self.starManager)
 
         #sleep(0)
         if self.player.alive == False:
-            self.reward += -3 + (0.6 * self.seconds)
+            #self.reward += -3 + (0.6 * self.seconds)
             #print("Reward: {0}".format(self.reward))
             return ts.termination(observation=self._get_observation(), reward=self.reward)
         else:
             #print("Reward: {0}".format(self.reward))
-            return ts.transition(observation=self._get_observation(), reward=self.reward)
+            return ts.transition(observation=self._get_observation(), reward=self.reward, discount=0.95)
         
     def _reset(self):
         self._state = 0
@@ -281,59 +267,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
     
 
     def _get_observation(self):
-        self.positions = []
-        # Get player and platform positions
-
-        #self.positions.append([self.player.x])
-
-        i = 1
-
-        for platform in self.platformManager.platforms:
-              if i < self.max_platforms:
-                  self.positions.append([platform.x])
-                  i += 1
-
-        # Pad platform positions with NaN if there are fewer than max_platforms
-        if len(self.positions) < self.max_platforms:
-            padding = [(0, 0)] * (self.max_platforms - len(self.positions))
-            self.positions.extend(padding)
-
-        # Create observation dictionary
-        observation = {
-            #'player_position': np.array(player_pos, dtype=np.float32),
-            'positions': np.array(self.positions, dtype=np.int32)
-        }
-
-        playerObservation = np.array([self.player.x, self.player.y], dtype=np.int64)
-
-
-        empty = [0]
-
-        # print("Observation: {0}".format(observation))
-        # print("Player Observation: {0}".format(playerObservation))
+        # Get player position
+        playerObservation = np.array([self.seconds], dtype=np.float64)
 
         return playerObservation
-    
-    def _get_reward(self):
-        reward = {
-            'reward': np.array([self.reward], dtype=np.int64)
-        }
-        return reward
-
-# if __name__ == "__main__":
-
-    # env = Nut0nEnv()
-
-    # time_step_spec = env.time_step_spec()
-
-    # print("********IN MAIN")
-
-    # print("discount: " + str(time_step_spec.discount))
-    # print("step_type: " + str(time_step_spec.step_type))
-    # print("reward: " + str(time_step_spec.reward))
-    # print("observation: " + str(time_step_spec.observation))
-
-    # # Testing environment with random action
-    # while True:
-    #     random_action = random.randint(0, 2)
-    #     time_step = env.step(random_action)
