@@ -67,6 +67,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         self.star = Star(400, 400)
 
+        # OLD CODE
         self._action_spec = {
             'move': array_spec.BoundedArraySpec(
                 shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
@@ -74,9 +75,16 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
         }
         
+        # self.max_platforms = 0
+        # self._observation_spec = array_spec.BoundedArraySpec(
+        #     shape=(2,), dtype=np.float32, minimum=0, name='observation')
+
+        # self._action_spec = array_spec.BoundedArraySpec(
+        #     shape=(2,), dtype=np.float32, minimum=2, name='move')
+        
         self.max_platforms = 0
         self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(self.max_platforms,), dtype=np.float32, minimum=0, name='observation')
+            shape=(0,), dtype=np.int32, minimum=0, name='observation')
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
@@ -153,23 +161,23 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.quit()
                 sys.exit()
 
-        self.reward += self.seconds * -0.6
-        self.reward += (1000 - self.player.y) * (1/ 60) # 0.007
+        self.reward += self.seconds * 1.0 #encourage player to 
+        self.reward += (1000 - self.player.y) * (1/ 60) 
         
         if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
-            self.reward += -1
+            self.reward += -50
 
         if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
-            self.reward += -1
+            self.reward += -50
 
         if action['jump'] == 1:
-            self.reward += 1.5
+            self.reward += 250
 
         #self.reward -= abs(self.player.x - 960) * 0.004
 
         for platform in self.platformManager.platforms:
             if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
-                self.reward += 0.5
+                self.reward -= 0.5
 
         #print("play y: {0}".format(1000 - self.player.y))
 
@@ -179,7 +187,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #sleep(0)
         if self.player.alive == False:
             self.reward += -3 + (0.6 * self.seconds)
-            print("Reward: {0}".format(self.reward))
+            #print("Reward: {0}".format(self.reward))
             return ts.termination(observation=self._get_observation(), reward=self.reward)
         else:
             #print("Reward: {0}".format(self.reward))
@@ -245,7 +253,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.positions = []
         # Get player and platform positions
 
-        #self.positions.append([self.player.x] )
+        #self.positions.append([self.player.x])
 
         i = 1
 
@@ -262,7 +270,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         # Create observation dictionary
         observation = {
             #'player_position': np.array(player_pos, dtype=np.float32),
-            'positions': np.array(self.positions, dtype=np.float32)
+            'positions': np.array(self.positions, dtype=np.int32)
         }
         #print("Observation: {0}".format(observation))
 
