@@ -10,9 +10,11 @@ import pygame
 import sys
 import math
 from tf_agents.specs import array_spec
+from tf_agents.specs import tensor_spec
 from tf_agents.environments import py_environment
 from tf_agents.trajectories import time_step as ts
 import numpy as np
+import random
 
 
 class Nut0nEnv(py_environment.PyEnvironment):
@@ -68,12 +70,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.star = Star(400, 400)
 
         # OLD CODE
-        self._action_spec = {
-            'move': array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
-            'jump': array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
-        }
+        
+        
+
+        
         
         # self.max_platforms = 0
         # self._observation_spec = array_spec.BoundedArraySpec(
@@ -83,15 +83,38 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #     shape=(2,), dtype=np.float32, minimum=2, name='move')
         
         self.max_platforms = 0
-        self._observation_spec = array_spec.BoundedArraySpec(
-            shape=(0,), dtype=np.int32, minimum=0, name='observation')
+        
         
         # Initialize the clock attribute
         self.clock = pygame.time.Clock()
 
         self.highScore = 0
 
-        self.reward = 0
+        #self.reward = 0
+        self._observation_spec = array_spec.ArraySpec(
+            shape=(2,), dtype=np.int64, name='observation')
+        
+        # self._observation_spec =  {
+        # 'step_type': array_spec.ArraySpec(shape=(1,), dtype=np.int32),
+        # 'next_step_type': array_spec.ArraySpec(shape=(1,), dtype=np.int32),
+        # 'reward': array_spec.ArraySpec(shape=(1,), dtype=np.float32),
+        # 'discount': array_spec.ArraySpec(shape=(1,), dtype=np.float32),
+        # 'observation': array_spec.ArraySpec(
+        #     shape=(1,2), dtype=np.int64, name='observation')
+        # }
+        
+        self._time_step_spec = ts.time_step_spec(self.observation_spec())
+        self._action_spec = {
+            'move': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
+            'jump': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
+        }
+
+        self._reward_spec = array_spec.BoundedArraySpec(
+            shape=(2,), dtype=np.int64, minimum=-100, maximum=100, name='reward')
+
+
     
 
     def _step(self, action):
@@ -247,7 +270,15 @@ class Nut0nEnv(py_environment.PyEnvironment):
     def action_spec(self):
         #print("**********in action_spec***************")
         return self._action_spec
-
+    
+    def reward_spec(self):
+        #print("**********in action_spec***************")
+        return self._reward_spec
+    
+    def time_step_spec(self):
+        print("**********in timee spec***************")
+        return self._time_step_spec
+    
 
     def _get_observation(self):
         self.positions = []
@@ -272,6 +303,37 @@ class Nut0nEnv(py_environment.PyEnvironment):
             #'player_position': np.array(player_pos, dtype=np.float32),
             'positions': np.array(self.positions, dtype=np.int32)
         }
-        #print("Observation: {0}".format(observation))
 
-        return observation
+        playerObservation = np.array([self.player.x, self.player.y], dtype=np.int64)
+
+
+        empty = [0]
+
+        # print("Observation: {0}".format(observation))
+        # print("Player Observation: {0}".format(playerObservation))
+
+        return playerObservation
+    
+    def _get_reward(self):
+        reward = {
+            'reward': np.array([self.reward], dtype=np.int64)
+        }
+        return reward
+
+# if __name__ == "__main__":
+
+    # env = Nut0nEnv()
+
+    # time_step_spec = env.time_step_spec()
+
+    # print("********IN MAIN")
+
+    # print("discount: " + str(time_step_spec.discount))
+    # print("step_type: " + str(time_step_spec.step_type))
+    # print("reward: " + str(time_step_spec.reward))
+    # print("observation: " + str(time_step_spec.observation))
+
+    # # Testing environment with random action
+    # while True:
+    #     random_action = random.randint(0, 2)
+    #     time_step = env.step(random_action)

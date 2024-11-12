@@ -18,6 +18,8 @@ from tf_agents.policies import py_tf_eager_policy
 from tf_agents.drivers import py_driver
 from tf_agents.replay_buffers import py_uniform_replay_buffer
 from tf_agents.drivers import dynamic_step_driver
+import tf_agents
+from tf_agents.specs import array_spec
 
 import tf_agents.policies as policies
 import numpy as np
@@ -37,7 +39,7 @@ BREAKOUT_REWARD = 1500000
 # Hyper parameters
 num_iterations = 1000  # @param {type:"integer"}
 collect_episodes_per_iteration = 10  # @param {type:"integer"}
-replay_buffer_capacity = 200000  # @param {type:"integer"}
+replay_buffer_capacity = 2000  # @param {type:"integer"}
 
 FC_LAYER_PARAMS = (200, 100) #a tuple of ints representing the sizes of each hidden layer
 
@@ -114,14 +116,39 @@ def compute_avg_return(environment, policy, num_episodes=10):
 
     return avg_return.numpy()[0]
 
+data_spec =  (
+        tf.TensorSpec([1], tf.int32, 'step_type123'),
+        tf.TensorSpec([1,2], tf.int64, 'observation'),
+        tf.TensorSpec([1], tf.int32, 'move'),
+        tf.TensorSpec([1], tf.int32, 'jump'),
+        tf.TensorSpec([1], tf.int32, 'next_step_type'),
+        tf.TensorSpec([1], tf.float32, 'reward'),
+        tf.TensorSpec([1], tf.float32, 'discount'),
+)
+
+ds = tf_agents.trajectories.Trajectory(
+    step_type = tf.TensorSpec([1], tf.int32, 'step_type'),
+    observation = tf.TensorSpec([1,2], tf.int64, 'observation'),
+    action = {tf.TensorSpec([1], tf.int32, 'move'),
+        tf.TensorSpec([1], tf.int32, 'jump')},
+    policy_info = (),
+    next_step_type = tf.TensorSpec([1], tf.int32, 'next_step_type'),
+    reward = tf.TensorSpec([1], tf.float32, 'reward'),
+    discount = tf.TensorSpec([1], tf.float32, 'discount')
+)
+
+py_collect_data_spec = tensor_spec.to_array_spec(tf_agent.collect_data_spec)
+
 #OLD REPLAY BUFFER
 replay_buffer = tf_uniform_replay_buffer.TFUniformReplayBuffer(
-    data_spec=tf_agent.collect_data_spec,
+    data_spec= tf_agent.collect_data_spec,
     batch_size=train_env.batch_size,
     max_length=replay_buffer_capacity
 )
 
 print("replay_buffer data spec: {0}".format(replay_buffer.data_spec))
+print("tf_agent.collect_data_spec: {0}".format(tf_agent.collect_data_spec))
+print("data spec: {0}".format(data_spec))
 
 # Add an observer that adds to the replay buffer:
 # replay_observer = [replay_buffer.add_batch]
@@ -146,7 +173,7 @@ def collect_episode(environment, policy, num_episodes):
         traj = trajectory.from_transition(time_step, action_step,
                                           next_time_step)
         print("Trajectory: {0}".format(traj))
-
+        
         # Add trajectory to the replay buffer
         replay_buffer.add_batch(traj)
 
@@ -170,9 +197,9 @@ if __name__ == "__main__":
     # Reset the train step
     tf_agent.train_step_counter.assign(0)
 
-    #print("Evaluating base policy:")
-    #pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
-    #print("Base return: {0}\n".format(pre_train_avg))
+    # print("Evaluating base policy:")
+    # pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
+    # print("Base return: {0}\n".format(pre_train_avg))
 
     manager.save()
 
@@ -180,8 +207,9 @@ if __name__ == "__main__":
     collect = []
 
     # Evaluate the agent's policy once before training.
-    avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
-    returns = [avg_return]
+    # avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
+    # returns = [avg_return]
+    returns = []
 
     print("Beginning Training...")
 
