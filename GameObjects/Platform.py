@@ -2,6 +2,7 @@ import pygame
 import random
 import uuid  # Import the uuid module
 from config import SMALL_PLATFORM_WIDTH, SMALL_PLATFORM_HEIGHT
+import pymunk
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image_path):
@@ -13,6 +14,8 @@ class Platform(pygame.sprite.Sprite):
         self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect(topleft=(x, y))
         self.id = uuid.uuid4()  # Generate a random UUID
+        self.body = pymunk.Body()
+        self.shape = pymunk.Poly.create_box(self.body, size=(self.width, self.height))
 
     def draw(self, window):
         window.blit(self.image, (self.rect.x, self.rect.y))

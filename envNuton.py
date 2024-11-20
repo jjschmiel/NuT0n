@@ -14,8 +14,47 @@ from tf_agents.specs import tensor_spec
 from tf_agents.environments import py_environment
 from tf_agents.trajectories import time_step as ts
 import numpy as np
+import pymunk
+from pygame.color import *
 import random
 
+GRAVITY = -200.00
+
+EVADER_DIAMETER = 0
+
+# ___Raycasts___
+drawRays = True
+
+# Prevent Raycasts from ending early on evader
+RAYCAST_PADDING = 0
+
+# List of ray starting points relative to evader body position
+ray_start = [
+    [-EVADER_DIAMETER - RAYCAST_PADDING,  RAYCAST_PADDING],
+    [-EVADER_DIAMETER + RAYCAST_PADDING, EVADER_DIAMETER - RAYCAST_PADDING],
+    [-RAYCAST_PADDING, EVADER_DIAMETER + RAYCAST_PADDING],
+    [RAYCAST_PADDING, EVADER_DIAMETER + RAYCAST_PADDING],
+    [EVADER_DIAMETER - RAYCAST_PADDING, EVADER_DIAMETER - RAYCAST_PADDING],
+    [EVADER_DIAMETER + RAYCAST_PADDING,  RAYCAST_PADDING],
+    [EVADER_DIAMETER + RAYCAST_PADDING,  RAYCAST_PADDING],
+    [EVADER_DIAMETER + RAYCAST_PADDING,  RAYCAST_PADDING]
+]
+
+# List of ray ending points relative to evader body position
+ray_end = [
+    [-400, 1],
+    [1, 400],
+    [400, 1],
+    [1, -400],
+    [400, 400],
+    [-400, 400],
+    [400, -400],
+    [-400, -400]
+]
+
+assert len(ray_start) == len(ray_end)
+#NUM_RAYS = len(ray_start)
+NUM_RAYS = 8
 
 class Nut0nEnv(py_environment.PyEnvironment):
     def __init__(self):
@@ -35,6 +74,10 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #pygame.mixer.music.load("Assets/Audio/LVL1.ogg")  # Load the music file
         #pygame.mixer.music.play()  # Play the music, -1 means loop indefinitely
         self.WIN = pygame.display.set_mode((1920, 1080), pygame.RESIZABLE)
+
+        self.space = pymunk.Space()
+        self.space.gravity = 0.0, GRAVITY
+        self.space.damping = 0.8
 
         # def play_lvl2_music(self):
         #     pygame.mixer.music.load("Assets/Audio/LVL2.ogg")
@@ -77,10 +120,12 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         self.highScore = 0
 
-        self._observation_spec = array_spec.ArraySpec(
-            shape=(1,), dtype=np.float64, name='observation')
+        self._observation_spec = array_spec.BoundedArraySpec(
+            shape=(NUM_RAYS,), dtype=np.float32, minimum=0.0, maximum=99999.9,name='observation')
         
         self._time_step_spec = ts.time_step_spec(self.observation_spec())
+        
+
         self._action_spec = {
             'move': array_spec.BoundedArraySpec(
                 shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
@@ -132,7 +177,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #     self.play_lvl4_music()
         #     self.playingLVL4Music = True
 
-        # if self.seconds >= 40 and self.playingBeyondMusic == False:
+        # if self.seconds >= 40 and self.playingBeyondMusic == False:fo
         #     self.play_beyond_music()
         #     self.playingBeyondMusic = True
 
@@ -156,51 +201,86 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.quit()
                 sys.exit()
 
-        #REWARDS
+        # #REWARDS
 
-        #Reward for how long you don't die
-        self.reward += self.seconds * 1.33
+        # #Reward for how long you don't die
+        self.reward += self.seconds * 3.0
         
-        #Reward for how high you get
-        self.reward += (1000 - self.player.y) * 0.42 
+        # #Reward for how high you get
+        self.reward += (1000 - self.player.y) * 0.0042 
 
-        #Reward for being in the center
-        #self.reward -= abs(self.player.x - 960) * 0.06
+        # #Reward for being in the center
+        # #self.reward -= abs(self.player.x - 960) * 0.06
         
-        #Reward for jumping
-        if action['jump'] == 1:
-            self.reward += 5
+        # #Reward for jumping
+        # if action['jump'] == 1:
+        #     self.reward += 5
 
-        #self.reward -= abs(self.player.x - 960) * 0.004
+        # #self.reward -= abs(self.player.x - 960) * 0.004
 
-        for platform in self.platformManager.platforms:
-            if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
-                #print("touching platform")
-                self.reward += (1000 - platform.y) * 0.5
+        # for platform in self.platformManager.platforms:
+        #     if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
+        #         #print("touching platform")
+        #         self.reward += (1000 - platform.y) * 0.5
 
-        #print("play y: {0}".format(self.player.y))
+        # #print("play y: {0}".format(self.player.y))
 
-        #Penalty for touching the right wall
-        if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
-            self.reward += -100
-            #return ts.termination(observation=self._get_observation(), reward=self.reward)
+        # #Penalty for touching the right wall
+        # if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
+        #     self.reward += -100
+        #     #return ts.termination(observation=self._get_observation(), reward=self.reward)
 
-        #Penalty for touching the left wall
-        if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
-            self.reward += -100
-            #return ts.termination(observation=self._get_observation(), reward=self.reward)
+        # #Penalty for touching the left wall
+        # if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
+        #     self.reward += -100
+        #     #return ts.termination(observation=self._get_observation(), reward=self.reward)
 
         update_active_game(self.player, self.platformManager, self.environment, self.seconds, self.starManager)
         draw_active_game(self.WIN, self.player, self.platformManager, self.environment, self.timer_text, self.highScore_text, self.starManager)
+
+        self.alphas = []
+        ex = self.player.x
+        ey = self.player.y
+
+        for i in range(NUM_RAYS):
+            start_x = ex + ray_start[i][0]
+            start_y = ey + ray_start[i][1]
+            start = start_x, start_y
+
+            end_x = ex + ray_end[i][0]
+            end_y = ey + ray_end[i][1]
+            end = end_x, end_y
+
+            p1 = int(start_x), int((start_y))
+            p2 = int(end_x), int((end_y))
+            pygame.draw.line(self.WIN, THECOLORS["green"], p1, p2, 1)
+            pygame.display.flip()
+
+            # Create a list of all sprites
+            all_sprites = self.platformManager.platforms
+
+            ray_sprite = pygame.sprite.Sprite()
+            ray_sprite.rect = pygame.Rect(start_x, start_y, end_x - start_x, end_y - start_y)
+            collided_sprites = pygame.sprite.spritecollide(ray_sprite, all_sprites, False)
+
+            if collided_sprites:
+                collision_point = collided_sprites[0].rect.center
+                pygame.draw.line(self.WIN, THECOLORS["red"], p1, collision_point, 1)
+                pygame.display.flip()
+                collision_point = collided_sprites[0].rect.center
+                distance = math.sqrt((collision_point[0] - start_x) ** 2 + (collision_point[1] - start_y) ** 2)
+                self.alphas.append(distance)
+            else:
+                self.alphas.append(99999.9)
 
         #sleep(0)
         if self.player.alive == False:
             #self.reward += -3 + (0.6 * self.seconds)
             #print("Reward: {0}".format(self.reward))
-            return ts.termination(observation=self._get_observation(), reward=self.reward)
+            return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
         else:
             #print("Reward: {0}".format(self.reward))
-            return ts.transition(observation=self._get_observation(), reward=self.reward, discount=0.95)
+            return ts.transition(np.array(self.alphas, dtype=np.float32), reward=self.reward, discount=0.95)
         
     def _reset(self):
         self._state = 0
@@ -245,9 +325,12 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.ready_to_increase = True
 
         self.m_scroll_speed = config.SCROLL_SPEED
+        new_obs = []
+        for _ in range(NUM_RAYS):
+            new_obs.append(1.0)
 
         self.star = Star(400, 400)
-        return ts.restart(observation=self._get_observation())
+        return ts.restart(np.array(new_obs, dtype=np.float32))
     
     def observation_spec(self):
         #print("**********in observation_spec***************")
@@ -257,17 +340,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
         #print("**********in action_spec***************")
         return self._action_spec
     
-    def reward_spec(self):
-        #print("**********in action_spec***************")
-        return self._reward_spec
+    # def reward_spec(self):
+    #     #print("**********in action_spec***************")
+    #     return self._reward_spec
     
-    def time_step_spec(self):
-        print("**********in timee spec***************")
-        return self._time_step_spec
+    # def time_step_spec(self):
+    #     # print("**********in timee spec***************")
+    #     return self._time_step_spec
     
-
-    def _get_observation(self):
-        # Get player position
-        playerObservation = np.array([self.seconds], dtype=np.float64)
-
-        return playerObservation
