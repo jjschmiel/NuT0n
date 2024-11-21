@@ -11,6 +11,7 @@ from tf_agents.networks import actor_distribution_network
 from tf_agents.replay_buffers import tf_uniform_replay_buffer
 from tf_agents.trajectories import trajectory
 from tf_agents.policies import epsilon_greedy_policy
+import numpy as np
 
 # suppress warning about CPU usage
 import os
@@ -24,16 +25,16 @@ BREAKOUT_REWARD = 1500000
 
 # Hyper parameters
 num_iterations = 100000  # @param {type:"integer"} 
-collect_episodes_per_iteration = 10  # @param {type:"integer"}
+collect_episodes_per_iteration = 3  # @param {type:"integer"}
 replay_buffer_capacity = 120000  # @param {type:"integer"}
 
-FC_LAYER_PARAMS = (200, 100) #a tuple of ints representing the sizes of each hidden layer
+FC_LAYER_PARAMS = (1000,1000) #a tuple of ints representing the sizes of each hidden layer
 
 learning_rate = 0.01  # @param {type:"number"}
 num_eval_episodes = 5  # @param {type:"integer"}
-eval_interval = 10  # @param {type:"integer"}
-save_interval = 10
-epsilon = 0.1
+eval_interval = 30  # @param {type:"integer"}
+save_interval = 60
+epsilon = 0.5
 tf.compat.v1.enable_v2_behavior()
 
 t_env = Env()
@@ -104,6 +105,7 @@ def compute_avg_return(environment, policy, num_episodes=10):
             time_step = environment.step(action_step.action)
             episode_return += time_step.reward
         total_return += episode_return
+        print("Episode return: {0}".format(episode_return))
 
     Env.graphics = False
     avg_return = total_return / num_episodes
@@ -149,8 +151,8 @@ if __name__ == "__main__":
     tf_agent.train_step_counter.assign(0)
 
     print("Evaluating base policy:")
-    pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
-    print("Base return: {0}\n".format(pre_train_avg))
+    #pre_train_avg = compute_avg_return(eval_env, tf_agent.policy)
+    #print("Base return: {0}\n".format(pre_train_avg))
 
     manager.save()
 
@@ -158,8 +160,8 @@ if __name__ == "__main__":
     collect = []
 
     # #Evaluate the agent's policy once before training.
-    avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
-    returns = [avg_return]
+    #avg_return = compute_avg_return(eval_env, tf_agent.policy, num_eval_episodes)
+    #returns = [avg_return]
     returns = []
 
     print("Beginning Training...")

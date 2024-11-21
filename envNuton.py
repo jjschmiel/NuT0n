@@ -26,7 +26,7 @@ EVADER_DIAMETER = 0
 drawRays = True
 
 # Prevent Raycasts from ending early on evader
-RAYCAST_PADDING = 0
+RAYCAST_PADDING = 2
 
 # List of ray starting points relative to evader body position
 ray_start = [
@@ -42,15 +42,17 @@ ray_start = [
 
 # List of ray ending points relative to evader body position
 ray_end = [
-    [-400, 1],
-    [1, 400],
-    [400, 1],
-    [1, -400],
     [400, 400],
     [-400, 400],
     [400, -400],
-    [-400, -400]
+    [-400, -400],
+    [-400, 1],
+    [1, 400],
+    [400, 1],
+    [1, -400]
 ]
+
+
 
 assert len(ray_start) == len(ray_end)
 #NUM_RAYS = len(ray_start)
@@ -64,6 +66,7 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self.playingLVL3Music = False
         self.playingLVL4Music = False
         self.playingBeyondMusic = False
+        self.jump_counter = 0
 
         self.RIGHT_EDGE_OF_PLAY_AREA = config.RIGHT_EDGE_OF_PLAY_AREA
         self.LEFT_EDGE_OF_PLAY_AREA = config.LEFT_EDGE_OF_PLAY_AREA
@@ -126,12 +129,16 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self._time_step_spec = ts.time_step_spec(self.observation_spec())
         
 
-        self._action_spec = {
-            'move': array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
-            'jump': array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
-        }
+        self._action_spec = array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=1, name='move')
+        
+
+        # self._action_spec = {
+        #     'move': array_spec.BoundedArraySpec(
+        #         shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
+        #     'jump': array_spec.BoundedArraySpec(
+        #         shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
+        # }
 
         # self._reward_spec = array_spec.BoundedArraySpec(
         #     shape=(2,), dtype=np.int64, minimum=-100, maximum=100, name='reward')
@@ -142,23 +149,30 @@ class Nut0nEnv(py_environment.PyEnvironment):
         if self.player.alive ==  False:
             return self.reset()
         
-        if action['move'] == 1:
+        if action == 0:
             self.player.moveRight = False
-            self.player.moveLeft = False
+            self.player.moveLeft = True
         
-        if action['move'] == 0:
+        if action == 1:
             self.player.moveRight = True
             self.player.moveLeft = False
 
-        if action['move'] == 2:
-            self.player.moveRight = False
-            self.player.moveLeft = True
+        # if action['move'] == 2:
+        #     self.player.moveRight = False
+        #     self.player.moveLeft = True
 
-        if action['jump'] == 0:
-            self.player.jump = False
+        # if action['jump'] == 0:
+        #     self.player.jump = False
 
-        if action['jump'] == 1:
+        # if action['jump'] == 1:
+        #     self.player.jump = True
+
+        if self.jump_counter < 20:
             self.player.jump = True
+            self.jump_counter += 1
+        else:
+            self.player.jump = False
+            self.jump_counter = 0
 
         self.clock.tick(60)  # Cap the frame rate at 60 FPS
 
@@ -204,16 +218,23 @@ class Nut0nEnv(py_environment.PyEnvironment):
         # #REWARDS
 
         # #Reward for how long you don't die
-        self.reward += self.seconds * 3.0
+        # self.reward += self.seconds * 3.0
         
         # #Reward for how high you get
-        self.reward += (1000 - self.player.y) * 0.0042 
+        self.reward += (1000 - self.player.y) * 0.042 
 
-        # #Reward for being in the center
-        # #self.reward -= abs(self.player.x - 960) * 0.06
+        #Reward for being in the center
+        # self.reward -= abs(self.player.x - 960) * 0.06
         
-        # #Reward for jumping
+        #Reward for jumping
         # if action['jump'] == 1:
+        #     self.reward += 1
+
+        # #Reward for moving
+        # if action['move'] == 1:
+        #     self.reward += 5
+
+        # if action['move'] == 2:
         #     self.reward += 5
 
         # #self.reward -= abs(self.player.x - 960) * 0.004
@@ -221,19 +242,11 @@ class Nut0nEnv(py_environment.PyEnvironment):
         # for platform in self.platformManager.platforms:
         #     if self.player.y + 50 >= platform.y and self.player.y + 50 <= platform.y + 10:
         #         #print("touching platform")
-        #         self.reward += (1000 - platform.y) * 0.5
+        #         self.reward += (1000 - platform.y) * 0.0002
 
         # #print("play y: {0}".format(self.player.y))
 
-        # #Penalty for touching the right wall
-        # if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
-        #     self.reward += -100
-        #     #return ts.termination(observation=self._get_observation(), reward=self.reward)
-
-        # #Penalty for touching the left wall
-        # if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
-        #     self.reward += -100
-        #     #return ts.termination(observation=self._get_observation(), reward=self.reward)
+        
 
         update_active_game(self.player, self.platformManager, self.environment, self.seconds, self.starManager)
         draw_active_game(self.WIN, self.player, self.platformManager, self.environment, self.timer_text, self.highScore_text, self.starManager)
@@ -253,8 +266,8 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
             p1 = int(start_x), int((start_y))
             p2 = int(end_x), int((end_y))
-            pygame.draw.line(self.WIN, THECOLORS["green"], p1, p2, 1)
-            pygame.display.flip()
+            # pygame.draw.line(self.WIN, THECOLORS["green"], p1, p2, 1)
+            # pygame.display.flip()
 
             # Create a list of all sprites
             all_sprites = self.platformManager.platforms
@@ -269,23 +282,37 @@ class Nut0nEnv(py_environment.PyEnvironment):
                 pygame.display.flip()
                 collision_point = collided_sprites[0].rect.center
                 distance = math.sqrt((collision_point[0] - start_x) ** 2 + (collision_point[1] - start_y) ** 2)
+                # print("collision point: {0}".format(collision_point))
+                # self.reward += 10 / distance + ((1000 - collision_point[1]) * 0.042)
                 self.alphas.append(distance)
             else:
-                self.alphas.append(99999.9)
+                self.alphas.append(0.0)
+
+        #Penalty for touching the right wall
+        if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
+            self.reward += -10
+            # return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
+
+        #Penalty for touching the left wall
+        if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
+            self.reward += -10
+            # return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
 
         #sleep(0)
         if self.player.alive == False:
             #self.reward += -3 + (0.6 * self.seconds)
             #print("Reward: {0}".format(self.reward))
-            return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
+            return ts.termination(np.array(self.alphas, dtype=np.float32), reward=-100)
         else:
             #print("Reward: {0}".format(self.reward))
-            return ts.transition(np.array(self.alphas, dtype=np.float32), reward=self.reward, discount=0.95)
+            #print("aplhass: {0}".format(self.alphas))
+            return ts.transition(np.array(self.alphas, dtype=np.float32), reward=self.reward, discount=0.90)
         
     def _reset(self):
         self._state = 0
+        self.jump_counter = 0
         self._episode_ended = False
-        print("Running active game")
+        #print("Running active game")
         self.playingLVL2Music = False
         self.playingLVL3Music = False
         self.playingLVL4Music = False
