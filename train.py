@@ -25,12 +25,12 @@ BREAKOUT_REWARD = 1500000
 
 # Hyper parameters
 num_iterations = 100000  # @param {type:"integer"} 
-collect_episodes_per_iteration = 3  # @param {type:"integer"}
+collect_episodes_per_iteration = 10  # @param {type:"integer"}
 replay_buffer_capacity = 120000  # @param {type:"integer"}
 
 FC_LAYER_PARAMS = (1000,1000) #a tuple of ints representing the sizes of each hidden layer
 
-learning_rate = 0.01  # @param {type:"number"}
+learning_rate = 0.00001  # @param {type:"number"}
 num_eval_episodes = 5  # @param {type:"integer"}
 eval_interval = 30  # @param {type:"integer"}
 save_interval = 60

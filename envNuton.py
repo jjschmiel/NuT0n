@@ -129,16 +129,16 @@ class Nut0nEnv(py_environment.PyEnvironment):
         self._time_step_spec = ts.time_step_spec(self.observation_spec())
         
 
-        self._action_spec = array_spec.BoundedArraySpec(
-                shape=(), dtype=np.int32, minimum=0, maximum=1, name='move')
+        # self._action_spec = array_spec.BoundedArraySpec(
+        #         shape=(), dtype=np.int32, minimum=0, maximum=1, name='move')
         
 
-        # self._action_spec = {
-        #     'move': array_spec.BoundedArraySpec(
-        #         shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
-        #     'jump': array_spec.BoundedArraySpec(
-        #         shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
-        # }
+        self._action_spec = {
+            'move': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=2, name='move'),
+            'jump': array_spec.BoundedArraySpec(
+                shape=(), dtype=np.int32, minimum=0, maximum=1, name='jump')
+        }
 
         # self._reward_spec = array_spec.BoundedArraySpec(
         #     shape=(2,), dtype=np.int64, minimum=-100, maximum=100, name='reward')
@@ -149,30 +149,34 @@ class Nut0nEnv(py_environment.PyEnvironment):
         if self.player.alive ==  False:
             return self.reset()
         
-        if action == 0:
+        # if action == 0:
+        #     self.player.moveRight = False
+        #     self.player.moveLeft = True
+        
+        # if action == 1:
+        #     self.player.moveRight = True
+        #     self.player.moveLeft = False
+
+        if action['move'] == 1:
             self.player.moveRight = False
             self.player.moveLeft = True
-        
-        if action == 1:
+
+        if action['move'] == 2:
             self.player.moveRight = True
             self.player.moveLeft = False
 
-        # if action['move'] == 2:
-        #     self.player.moveRight = False
-        #     self.player.moveLeft = True
-
-        # if action['jump'] == 0:
-        #     self.player.jump = False
-
-        # if action['jump'] == 1:
-        #     self.player.jump = True
-
-        if self.jump_counter < 20:
-            self.player.jump = True
-            self.jump_counter += 1
-        else:
+        if action['jump'] == 0:
             self.player.jump = False
-            self.jump_counter = 0
+
+        if action['jump'] == 1:
+            self.player.jump = True
+
+        # if self.jump_counter < 20:
+        #     self.player.jump = True
+        #     self.jump_counter += 1
+        # else:
+        #     self.player.jump = False
+        #     self.jump_counter = 0
 
         self.clock.tick(60)  # Cap the frame rate at 60 FPS
 
@@ -290,12 +294,12 @@ class Nut0nEnv(py_environment.PyEnvironment):
 
         #Penalty for touching the right wall
         if self.player.x + 46 >= self.RIGHT_EDGE_OF_PLAY_AREA:
-            self.reward += -10
+            self.reward += -50
             # return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
 
         #Penalty for touching the left wall
         if self.player.x - 50 <= self.LEFT_EDGE_OF_PLAY_AREA:
-            self.reward += -10
+            self.reward += -50
             # return ts.termination(np.array(self.alphas, dtype=np.float32), reward=self.reward)
 
         #sleep(0)
